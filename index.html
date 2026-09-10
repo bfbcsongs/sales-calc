@@ -583,6 +583,38 @@ function calculate() {
     setVal('total', total);
 }
 
+let deferredPrompt;
+let installButton;
+
+// Capture the install prompt
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Create and show install button
+    if (!installButton) {
+        installButton = document.createElement('button');
+        installButton.textContent = 'Install App';
+        installButton.style.cssText = 'padding: 10px 20px; background-color: #107c41; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 10px; width: 100%; font-weight: 700;';
+        document.querySelector('.container').insertBefore(installButton, document.querySelector('table'));
+        
+        installButton.addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response: ${outcome}`);
+            deferredPrompt = null;
+            installButton.style.display = 'none';
+        });
+    }
+});
+
+// Hide install button when app is installed
+window.addEventListener('appinstalled', () => {
+    console.log('App installed successfully');
+    if (installButton) installButton.style.display = 'none';
+    deferredPrompt = null;
+});
+
 /* Register offline Service Worker */
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
