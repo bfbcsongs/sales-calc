@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Order Sheet</title>
 
@@ -581,33 +581,15 @@ function calculate() {
         bal;
 
     setVal('total', total);
+}
 
-
-    /*
-       Register offline Service Worker
-       — same placement as the
-         working Master List Calculator
-    */
-    if ('serviceWorker' in navigator) {
-
-        navigator.serviceWorker
-            .register('./sw.js')
-            .then(function(registration) {
-
-                console.log(
-                    'Order Sheet offline service worker registered:',
-                    registration.scope
-                );
-
-            })
-            .catch(function(error) {
-
-                console.error(
-                    'Order Sheet service worker registration failed:',
-                    error
-                );
-            });
-    }
+/* Register offline Service Worker */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+        });
+    });
 }
 
 </script>
