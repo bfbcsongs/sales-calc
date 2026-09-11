@@ -493,11 +493,10 @@ function saveAndCalculate() {
     calculate();
 }
 
-
-/* CLEAR QTY, Payment, and Bal */
+/* CLEAR QTY, Payment, at Bal */
 function clearQuantities() {
 
-    let quantityIds = [
+    let fieldsToClear = [
         'qty_dry',
         'qty_fresh',
         'qty_cab',
@@ -506,81 +505,58 @@ function clearQuantities() {
         'bal'
     ];
 
-    quantityIds.forEach(id => {
-
-        document.getElementById(id).value = '';
-
-        localStorage.removeItem(
-            'order_' + id
-        );
+    // 1. Linisin ang inputs at burahin sa LocalStorage
+    fieldsToClear.forEach(id => {
+        let input = document.getElementById(id);
+        if (input) {
+            input.value = '';
+        }
+        localStorage.removeItem('order_' + id);
     });
 
-    calculate();
+    // 2. Linisin pati ang Readonly Amount fields sa UI
+    let readonlyFields = ['amt_dry', 'amt_fresh', 'amt_cab', 'amt_bo', 'subtotal', 'total'];
+    readonlyFields.forEach(id => {
+        let input = document.getElementById(id);
+        if (input) {
+            input.value = '';
+        }
+    });
 }
 
 
 function calculate() {
 
-    let getVal = (id) =>
-        parseFloat(
-            document.getElementById(id).value
-        ) || 0;
+    let getVal = (id) => {
+        let val = document.getElementById(id).value;
+        return val === '' ? 0 : parseFloat(val) || 0;
+    };
 
-    let setVal = (id, val) =>
-        document.getElementById(id).value =
-            val ? val.toFixed(2) : '';
+    let setVal = (id, val) => {
+        // Kapag walang laman o zero ang resulta, blank lang ang UI
+        document.getElementById(id).value = (val && val !== 0) ? val.toFixed(2) : '';
+    };
 
-
-    let amtDry =
-        getVal('price_dry') *
-        getVal('qty_dry');
-
-    let amtFresh =
-        getVal('price_fresh') *
-        getVal('qty_fresh');
-
-    let amtCab =
-        getVal('price_cab') *
-        getVal('qty_cab');
-
+    let amtDry = getVal('price_dry') * getVal('qty_dry');
+    let amtFresh = getVal('price_fresh') * getVal('qty_fresh');
+    let amtCab = getVal('price_cab') * getVal('qty_cab');
 
     /* BO AUTO FORMULA */
-    let qtyBo =
-        getVal('qty_bo');
-
-    let boUnitPrice =
-        getVal('price_bo');
-
-    let amtBo =
-        (qtyBo / 2) *
-        boUnitPrice;
-
+    let qtyBo = getVal('qty_bo');
+    let boUnitPrice = getVal('price_bo');
+    let amtBo = (qtyBo / 2) * boUnitPrice;
 
     setVal('amt_dry', amtDry);
     setVal('amt_fresh', amtFresh);
     setVal('amt_cab', amtCab);
     setVal('amt_bo', amtBo);
 
-
-    let subTotal =
-        amtFresh +
-        amtDry +
-        amtCab -
-        amtBo;
-
+    let subTotal = amtFresh + amtDry + amtCab - amtBo;
     setVal('subtotal', subTotal);
 
-
-    let payment =
-        getVal('payment');
-
-    let bal =
-        getVal('bal');
-
-    let total =
-        subTotal -
-        payment +
-        bal;
+    let payment = getVal('payment');
+    let bal = getVal('bal');
+    let total = subTotal - payment + bal;
 
     setVal('total', total);
 }
