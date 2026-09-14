@@ -326,11 +326,8 @@ input[readonly] {
 
 <!-- Row 1: Sub Total -->
 <tr>
-    <td>
+    <td colspan="2">
         <button class="mem-btn m-plus" onclick="memoryAdd()" title="Add Total to M+">M+</button>
-    </td>
-    <td>
-        <!-- Empty cell filler -->
     </td>
     <td class="label-col">Sub Total</td>
     <td>
@@ -342,13 +339,10 @@ input[readonly] {
     </td>
 </tr>
 
-<!-- Row 2: Payment & MC Button -->
+<!-- Row 2: Payment -->
 <tr>
-    <td>
+    <td colspan="2">
         <button class="mem-btn mc" onclick="memoryClear()" title="Clear Memory">MC</button>
-    </td>
-    <td>
-        <!-- Empty cell filler -->
     </td>
     <td class="label-col">Payment</td>
     <td>
@@ -361,13 +355,10 @@ input[readonly] {
     </td>
 </tr>
 
-<!-- Row 3: Bal & MR Button -->
+<!-- Row 3: Bal -->
 <tr>
-    <td>
+    <td colspan="2">
         <button class="mem-btn" onclick="memoryRecall()" title="Recall M+ to Balance">MR</button>
-    </td>
-    <td>
-        <!-- Empty cell filler -->
     </td>
     <td class="label-col">Bal</td>
     <td>
@@ -380,11 +371,10 @@ input[readonly] {
     </td>
 </tr>
 
-<!-- Row 4: Total & Pure M+ Value Display (Beside Total) -->
+<!-- Row 4: Total & Pure M+ Value Full-Width Display Beside Total -->
 <tr>
-    <td></td>
-    <td>
-        <input type="text" id="m_display" value="" readonly style="font-size:12px; font-weight:bold; color:#1d4ed8; background:#eff6ff;">
+    <td colspan="2">
+        <input type="text" id="m_display" value="" readonly style="font-size:13px; font-weight:bold; color:#1d4ed8; background:#eff6ff;">
     </td>
     <td class="label-col">Total</td>
     <td>
@@ -528,15 +518,6 @@ function clearQuantities() {
         'bal'
     ];
 
-    fieldsToClear.fieldsToClear = fieldsToClear.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) {
-            el.value = '';
-        }
-        localStorage.removeItem('order_' + id);
-    });
-
-    // Clean execution fix for clearing quantities array loop
     fieldsToClear.forEach(id => {
         let el = document.getElementById(id);
         if (el) { el.value = ''; }
