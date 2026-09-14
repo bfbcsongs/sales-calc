@@ -324,13 +324,13 @@ input[readonly] {
     </td>
 </tr>
 
-<!-- Row 1: Sub Total & M+ Button -->
+<!-- Row 1: Sub Total -->
 <tr>
     <td>
         <button class="mem-btn m-plus" onclick="memoryAdd()" title="Add Total to M+">M+</button>
     </td>
     <td>
-        <input type="text" id="m_display" value="M: 0" readonly style="font-size:11px; font-weight:bold; color:#1d4ed8; background:#eff6ff;">
+        <!-- Empty cell filler -->
     </td>
     <td class="label-col">Sub Total</td>
     <td>
@@ -380,9 +380,12 @@ input[readonly] {
     </td>
 </tr>
 
-<!-- Row 4: Total -->
+<!-- Row 4: Total & Pure M+ Value Display (Beside Total) -->
 <tr>
-    <td colspan="2"></td>
+    <td></td>
+    <td>
+        <input type="text" id="m_display" value="" readonly style="font-size:12px; font-weight:bold; color:#1d4ed8; background:#eff6ff;">
+    </td>
     <td class="label-col">Total</td>
     <td>
         <input
@@ -461,7 +464,7 @@ function memoryRecall() {
 function updateMemoryDisplay() {
     let mDisplay = document.getElementById('m_display');
     if (mDisplay) {
-        mDisplay.value = "M: " + memoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        mDisplay.value = memoryValue !== 0 ? memoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '';
     }
 }
 
@@ -525,11 +528,18 @@ function clearQuantities() {
         'bal'
     ];
 
-    fieldsToClear.forEach(id => {
+    fieldsToClear.fieldsToClear = fieldsToClear.forEach(id => {
         let el = document.getElementById(id);
         if (el) {
             el.value = '';
         }
+        localStorage.removeItem('order_' + id);
+    });
+
+    // Clean execution fix for clearing quantities array loop
+    fieldsToClear.forEach(id => {
+        let el = document.getElementById(id);
+        if (el) { el.value = ''; }
         localStorage.removeItem('order_' + id);
     });
 
@@ -602,6 +612,7 @@ window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
 });
 
+/* Register offline Service Worker */
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => {
