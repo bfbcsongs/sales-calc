@@ -27,6 +27,13 @@ body {
     font-size: 13px;
 }
 
+.app-container {
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .main-layout {
     display: flex;
     gap: 2px;
@@ -34,16 +41,9 @@ body {
     max-width: 100%;
 }
 
-/* Left column container holding both main table and bottom quick panel */
-.left-column {
+.left-panel {
     flex: 1;
     min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.left-panel {
     background: #ffffff;
     padding: 3px;
     border-radius: 6px;
@@ -65,8 +65,17 @@ body {
     flex-direction: column;
 }
 
-/* Quick Access Bottom Panel Styles */
+/* Bottom Full-Width Quick Access Panel spanning left to right */
+.bottom-bar {
+    display: flex;
+    gap: 2px;
+    align-items: stretch;
+    width: 100%;
+}
+
 .quick-panel {
+    flex: 1;
+    min-width: 0;
     background: #ffffff;
     padding: 3px;
     border-radius: 6px;
@@ -95,6 +104,37 @@ body {
     border: 1px solid #e2e8f0;
     padding: 3px 2px;
     text-align: center;
+}
+
+/* Bottom M+ Panel under History Table */
+.bottom-m-panel {
+    width: 95px;
+    background: #ffffff;
+    padding: 3px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bottom-m-btn {
+    width: 100%;
+    height: 100%;
+    min-height: 44px;
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.bottom-m-btn:active {
+    background-color: #bfdbfe;
+    transform: scale(0.98);
 }
 
 table {
@@ -296,205 +336,218 @@ input[readonly] {
 
 <body>
 
+<div class="app-container">
+
 <div class="main-layout">
 
-<!-- Left Column: Contains Main Calculator AND Quick Panel directly underneath it -->
-<div class="left-column">
+<!-- Left Panel: Main Order Calculator -->
+<div class="left-panel">
+<div>
+<table>
+<tr>
+    <th class="qty-col">QTY</th>
+    <th
+        class="price-col price-header"
+        onclick="handlePriceHeaderTap()"
+        title="Tap 5 times to unlock/lock prices"
+    >
+        Unit Price
+    </th>
+    <th class="label-col">A</th>
+    <th class="amt-col">Amount</th>
+</tr>
 
-    <!-- Left Panel: Main Order Calculator -->
-    <div class="left-panel">
-    <div>
-    <table>
-    <tr>
-        <th class="qty-col">QTY</th>
-        <th
-            class="price-col price-header"
-            onclick="handlePriceHeaderTap()"
-            title="Tap 5 times to unlock/lock prices"
+<tr>
+    <td>
+        <input
+            type="number"
+            id="qty_dry"
+            placeholder=""
+            oninput="syncAndCalculate('qty_dry')"
         >
-            Unit Price
-        </th>
-        <th class="label-col">A</th>
-        <th class="amt-col">Amount</th>
-    </tr>
+    </td>
+    <td>
+        <input
+            type="number"
+            id="price_dry"
+            value="45"
+            readonly
+            oninput="saveAndCalculate()"
+        >
+    </td>
+    <td class="label-col">Dry</td>
+    <td>
+        <input type="text" id="amt_dry" readonly>
+    </td>
+</tr>
 
-    <tr>
-        <td>
-            <input
-                type="number"
-                id="qty_dry"
-                placeholder=""
-                oninput="syncAndCalculate('qty_dry')"
-            >
-        </td>
-        <td>
-            <input
-                type="number"
-                id="price_dry"
-                value="45"
-                readonly
-                oninput="saveAndCalculate()"
-            >
-        </td>
-        <td class="label-col">Dry</td>
-        <td>
-            <input type="text" id="amt_dry" readonly>
-        </td>
-    </tr>
+<tr>
+    <td>
+        <input
+            type="number"
+            id="qty_fresh"
+            placeholder=""
+            oninput="syncAndCalculate('qty_fresh')"
+        >
+    </td>
+    <td>
+        <input
+            type="number"
+            id="price_fresh"
+            value="45"
+            readonly
+            oninput="saveAndCalculate()"
+        >
+    </td>
+    <td class="label-col">Fresh</td>
+    <td>
+        <input type="text" id="amt_fresh" readonly>
+    </td>
+</tr>
 
-    <tr>
-        <td>
-            <input
-                type="number"
-                id="qty_fresh"
-                placeholder=""
-                oninput="syncAndCalculate('qty_fresh')"
-            >
-        </td>
-        <td>
-            <input
-                type="number"
-                id="price_fresh"
-                value="45"
-                readonly
-                oninput="saveAndCalculate()"
-            >
-        </td>
-        <td class="label-col">Fresh</td>
-        <td>
-            <input type="text" id="amt_fresh" readonly>
-        </td>
-    </tr>
+<tr>
+    <td>
+        <input
+            type="number"
+            id="qty_cab"
+            placeholder=""
+            oninput="syncAndCalculate('qty_cab')"
+        >
+    </td>
+    <td>
+        <input
+            type="number"
+            id="price_cab"
+            value="40"
+            readonly
+            oninput="saveAndCalculate()"
+        >
+    </td>
+    <td class="label-col">Cab</td>
+    <td>
+        <input type="text" id="amt_cab" readonly>
+    </td>
+</tr>
 
-    <tr>
-        <td>
-            <input
-                type="number"
-                id="qty_cab"
-                placeholder=""
-                oninput="syncAndCalculate('qty_cab')"
-            >
-        </td>
-        <td>
-            <input
-                type="number"
-                id="price_cab"
-                value="40"
-                readonly
-                oninput="saveAndCalculate()"
-            >
-        </td>
-        <td class="label-col">Cab</td>
-        <td>
-            <input type="text" id="amt_cab" readonly>
-        </td>
-    </tr>
+<tr>
+    <td>
+        <input
+            type="number"
+            id="qty_bo"
+            placeholder=""
+            oninput="syncAndCalculate('qty_bo')"
+        >
+    </td>
+    <td>
+        <input
+            type="number"
+            id="price_bo"
+            value="45"
+            readonly
+            oninput="saveAndCalculate()"
+        >
+    </td>
+    <td class="label-col">BO</td>
+    <td>
+        <input type="text" id="amt_bo" readonly>
+    </td>
+</tr>
 
-    <tr>
-        <td>
-            <input
-                type="number"
-                id="qty_bo"
-                placeholder=""
-                oninput="syncAndCalculate('qty_bo')"
-            >
-        </td>
-        <td>
-            <input
-                type="number"
-                id="price_bo"
-                value="45"
-                readonly
-                oninput="saveAndCalculate()"
-            >
-        </td>
-        <td class="label-col">BO</td>
-        <td>
-            <input type="text" id="amt_bo" readonly>
-        </td>
-    </tr>
+<!-- Utility Row: Formula & Clear Button -->
+<tr class="utility-row">
+    <td colspan="2" class="auto-formula">
+        Auto: (BO ÷ 2) × Price
+    </td>
+    <td colspan="2">
+        <button class="clear-button" onclick="clearQuantities()">CLEAR QTY</button>
+    </td>
+</tr>
 
-    <!-- Utility Row: Formula & Clear Button -->
-    <tr class="utility-row">
-        <td colspan="2" class="auto-formula">
-            Auto: (BO ÷ 2) × Price
-        </td>
-        <td colspan="2">
-            <button class="clear-button" onclick="clearQuantities()">CLEAR QTY</button>
-        </td>
-    </tr>
+<!-- Row 1: Sub Total & M+ Button -->
+<tr>
+    <td>
+        <button class="mem-btn m-plus" onclick="memoryAdd()" title="Add Total to M+">M+</button>
+    </td>
+    <td colspan="2" class="label-col">Sub Total</td>
+    <td>
+        <input
+            type="text"
+            id="subtotal"
+            readonly
+        >
+    </td>
+</tr>
 
-    <!-- Row 1: Sub Total & M+ Button -->
-    <tr>
-        <td>
-            <button class="mem-btn m-plus" onclick="memoryAdd()" title="Add Total to M+">M+</button>
-        </td>
-        <td colspan="2" class="label-col">Sub Total</td>
-        <td>
-            <input
-                type="text"
-                id="subtotal"
-                readonly
-            >
-        </td>
-    </tr>
+<!-- Row 2: Payment & MC Button -->
+<tr>
+    <td>
+        <button class="mem-btn mc" onclick="memoryClear()" title="Clear Memory">MC</button>
+    </td>
+    <td colspan="2" class="label-col">Payment</td>
+    <td>
+        <input
+            type="number"
+            id="payment"
+            placeholder=""
+            oninput="saveAndCalculate()"
+        >
+    </td>
+</tr>
 
-    <!-- Row 2: Payment & MC Button -->
-    <tr>
-        <td>
-            <button class="mem-btn mc" onclick="memoryClear()" title="Clear Memory">MC</button>
-        </td>
-        <td colspan="2" class="label-col">Payment</td>
-        <td>
-            <input
-                type="number"
-                id="payment"
-                placeholder=""
-                oninput="saveAndCalculate()"
-            >
-        </td>
-    </tr>
+<!-- Row 3: Bal & MR Button -->
+<tr>
+    <td>
+        <button class="mem-btn" onclick="memoryRecall()" title="Recall M+ to Balance">MR</button>
+    </td>
+    <td colspan="2" class="label-col">Bal</td>
+    <td>
+        <input
+            type="number"
+            id="bal"
+            placeholder=""
+            oninput="saveAndCalculate()"
+        >
+    </td>
+</tr>
 
-    <!-- Row 3: Bal & MR Button -->
-    <tr>
-        <td>
-            <button class="mem-btn" onclick="memoryRecall()" title="Recall M+ to Balance">MR</button>
-        </td>
-        <td colspan="2" class="label-col">Bal</td>
-        <td>
-            <input
-                type="number"
-                id="bal"
-                placeholder=""
-                oninput="saveAndCalculate()"
-            >
-        </td>
-    </tr>
+<!-- Row 4: Total at the very bottom -->
+<tr>
+    <td>
+        <input type="text" id="m_display" value="" readonly style="font-size:10px; font-weight:bold; color:#1d4ed8; background:#eff6ff;" title="Accumulated M+ Total">
+    </td>
+    <td colspan="2" class="label-col">Total</td>
+    <td>
+        <input
+            type="text"
+            id="total"
+            readonly
+        >
+    </td>
+</tr>
 
-    <!-- Row 4: Total at the very bottom -->
-    <tr>
-        <td>
-            <input type="text" id="m_display" value="" readonly style="font-size:10px; font-weight:bold; color:#1d4ed8; background:#eff6ff;" title="Accumulated M+ Total">
-        </td>
-        <td colspan="2" class="label-col">Total</td>
-        <td>
-            <input
-                type="text"
-                id="total"
-                readonly
-            >
-        </td>
-    </tr>
+</table>
+</div>
 
-    </table>
+<div class="footer-credit">
+    created by paulm
+</div>
+</div>
+
+<!-- Right Panel: M+ History List -->
+<div class="right-panel">
+    <div class="history-header">M+ History</div>
+    <ul id="history-list" class="history-list">
+        <li style="text-align:center; color:#94a3b8; font-size:10px; padding:20px 4px;">No entries</li>
+    </ul>
+    <div class="history-footer">
+        <input type="text" id="history_total" value="" readonly placeholder="Σ 0">
     </div>
+</div>
 
-    <div class="footer-credit">
-        created by paulm
-    </div>
-    </div>
+</div>
 
-    <!-- Bottom Quick Access Panel -->
+<!-- Bottom Full-Width Bar (Quick QTY Panel + M+ Button under History) -->
+<div class="bottom-bar">
     <div class="quick-panel">
         <table class="quick-table">
             <tr>
@@ -511,17 +564,9 @@ input[readonly] {
             </tr>
         </table>
     </div>
-
-</div>
-
-<!-- Right Panel: M+ History List -->
-<div class="right-panel">
-    <div class="history-header">M+ History</div>
-    <ul id="history-list" class="history-list">
-        <li style="text-align:center; color:#94a3b8; font-size:10px; padding:20px 4px;">No entries</li>
-    </ul>
-    <div class="history-footer">
-        <input type="text" id="history_total" value="" readonly placeholder="Σ 0">
+    
+    <div class="bottom-m-panel">
+        <button class="bottom-m-btn" onclick="memoryAdd()" title="Add Total to M+">M+</button>
     </div>
 </div>
 
