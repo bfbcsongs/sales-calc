@@ -20,53 +20,21 @@
 
 body {
     margin: 0;
-    padding: 8px;
+    padding: 6px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: #f8fafc;
     color: #334155;
-    font-size: 14px;
-}
-
-.main-layout {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-    align-items: flex-start;
-    max-width: 100%;
-}
-
-@media (max-width: 600px) {
-    .main-layout {
-        flex-direction: column;
-    }
+    font-size: 13px;
 }
 
 .container {
-    flex: 1;
-    min-width: 0;
+    max-width: 100%;
     background: #ffffff;
-    padding: 8px;
-    border-radius: 12px;
+    padding: 6px;
+    border-radius: 10px;
     box-shadow:
         0 4px 6px -1px rgba(0, 0, 0, 0.1),
         0 2px 4px -2px rgba(0, 0, 0, 0.1);
-}
-
-.history-sidebar {
-    width: 220px;
-    background: #ffffff;
-    padding: 8px;
-    border-radius: 12px;
-    box-shadow:
-        0 4px 6px -1px rgba(0, 0, 0, 0.1),
-        0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0;
-}
-
-@media (max-width: 600px) {
-    .history-sidebar {
-        width: 100%;
-    }
 }
 
 table {
@@ -78,7 +46,7 @@ table {
 th,
 td {
     border: 1px solid #e2e8f0;
-    padding: 8px 2px;
+    padding: 6px 2px;
     text-align: center;
     overflow: hidden;
 }
@@ -89,7 +57,7 @@ th {
     font-weight: 700;
     color: #475569;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
 }
 
 th.price-header {
@@ -103,11 +71,11 @@ th.price-header:active {
 
 input {
     width: 100%;
-    padding: 6px 2px;
+    padding: 5px 2px;
     text-align: center;
     border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 13px;
+    border-radius: 5px;
+    font-size: 12px;
     background-color: #fff;
     transition: all 0.2s;
 }
@@ -132,54 +100,55 @@ input[readonly] {
     border-color: #fecaca;
 }
 
-/* Adjusted Column Widths */
-.mem-col {
-    width: 14%;
-}
-
+/* Column Widths optimized to fit 5 columns without CMD */
 .qty-col {
-    width: 18%;
+    width: 16%;
 }
 
 .price-col {
-    width: 22%;
+    width: 20%;
 }
 
 .label-col {
-    width: 18%;
+    width: 16%;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
     color: #1e293b;
     background-color: #f8fafc;
 }
 
 .amt-col {
-    width: 28%;
+    width: 24%;
+}
+
+.history-col {
+    width: 24%;
+    background-color: #f8fafc;
 }
 
 .auto-formula {
     text-align: left;
-    font-size: 10px;
+    font-size: 9px;
     font-style: italic;
     color: #94a3b8;
     background-color: #f8fafc;
-    padding-left: 6px;
+    padding-left: 4px;
 }
 
 .clear-row {
-    padding: 8px 4px;
+    padding: 6px 4px;
     border: 1px solid #e2e8f0;
     text-align: center;
 }
 
 .clear-button {
     width: 100%;
-    padding: 8px 12px;
+    padding: 7px 10px;
     border: 1px solid #fecaca;
-    border-radius: 6px;
+    border-radius: 5px;
     background-color: #fef2f2;
     color: #dc2626;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     cursor: pointer;
 }
@@ -191,12 +160,12 @@ input[readonly] {
 
 .mem-btn {
     width: 100%;
-    padding: 6px 1px;
+    padding: 5px 2px;
     border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    border-radius: 5px;
     background-color: #e2e8f0;
     color: #1e293b;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     cursor: pointer;
 }
@@ -218,62 +187,31 @@ input[readonly] {
     color: #dc2626;
 }
 
-.history-title {
+.history-cell-input {
+    background-color: #ffffff !important;
+    color: #1d4ed8 !important;
+    font-weight: 700;
     font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #475569;
-    margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.history-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 320px;
-    overflow-y: auto;
-}
-
-.history-item {
-    font-size: 12px;
-    padding: 6px 8px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    margin-bottom: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.history-item span.amount {
-    font-weight: 700;
-    color: #1d4ed8;
+    border-color: #bfdbfe !important;
 }
 
 .footer-credit {
     text-align: center;
     font-style: italic;
-    font-size: 11px;
+    font-size: 10px;
     color: #94a3b8;
-    margin-top: 8px;
+    margin-top: 6px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="main-layout">
-
 <div class="container">
 
 <table>
 
 <tr>
-    <th class="mem-col">CMD</th>
     <th class="qty-col">QTY</th>
     <th
         class="price-col price-header"
@@ -284,10 +222,10 @@ input[readonly] {
     </th>
     <th class="label-col">A</th>
     <th class="amt-col">Amount</th>
+    <th class="history-col">M+ History</th>
 </tr>
 
 <tr>
-    <td></td>
     <td>
         <input
             type="number"
@@ -309,10 +247,10 @@ input[readonly] {
     <td>
         <input type="text" id="amt_dry" readonly>
     </td>
+    <td><input type="text" id="hist_0" class="history-cell-input" readonly></td>
 </tr>
 
 <tr>
-    <td></td>
     <td>
         <input
             type="number"
@@ -334,10 +272,10 @@ input[readonly] {
     <td>
         <input type="text" id="amt_fresh" readonly>
     </td>
+    <td><input type="text" id="hist_1" class="history-cell-input" readonly></td>
 </tr>
 
 <tr>
-    <td></td>
     <td>
         <input
             type="number"
@@ -359,10 +297,10 @@ input[readonly] {
     <td>
         <input type="text" id="amt_cab" readonly>
     </td>
+    <td><input type="text" id="hist_2" class="history-cell-input" readonly></td>
 </tr>
 
 <tr>
-    <td></td>
     <td>
         <input
             type="number"
@@ -384,14 +322,14 @@ input[readonly] {
     <td>
         <input type="text" id="amt_bo" readonly>
     </td>
+    <td><input type="text" id="hist_3" class="history-cell-input" readonly></td>
 </tr>
 
 <tr>
-    <td></td>
     <td colspan="2" class="auto-formula">
-        Auto: (BO QTY ÷ 2) × Price
+        Auto: (BO ÷ 2) × Price
     </td>
-    <td colspan="2"></td>
+    <td colspan="3"></td>
 </tr>
 
 <tr>
@@ -405,13 +343,12 @@ input[readonly] {
     </td>
 </tr>
 
-<!-- Row 1: Sub Total -->
+<!-- Row 1: Sub Total & M+ Button -->
 <tr>
     <td>
         <button class="mem-btn m-plus" onclick="memoryAdd()" title="Add Total to M+">M+</button>
     </td>
-    <td colspan="2"></td>
-    <td class="label-col">Sub Total</td>
+    <td colspan="2" class="label-col">Sub Total</td>
     <td>
         <input
             type="text"
@@ -419,15 +356,15 @@ input[readonly] {
             readonly
         >
     </td>
+    <td><input type="text" id="hist_4" class="history-cell-input" readonly></td>
 </tr>
 
-<!-- Row 2: Payment -->
+<!-- Row 2: Payment & MC Button -->
 <tr>
     <td>
         <button class="mem-btn mc" onclick="memoryClear()" title="Clear Memory">MC</button>
     </td>
-    <td colspan="2"></td>
-    <td class="label-col">Payment</td>
+    <td colspan="2" class="label-col">Payment</td>
     <td>
         <input
             type="number"
@@ -436,15 +373,15 @@ input[readonly] {
             oninput="saveAndCalculate()"
         >
     </td>
+    <td><input type="text" id="hist_5" class="history-cell-input" readonly></td>
 </tr>
 
-<!-- Row 3: Bal -->
+<!-- Row 3: Bal & MR Button -->
 <tr>
     <td>
         <button class="mem-btn" onclick="memoryRecall()" title="Recall M+ to Balance">MR</button>
     </td>
-    <td colspan="2"></td>
-    <td class="label-col">Bal</td>
+    <td colspan="2" class="label-col">Bal</td>
     <td>
         <input
             type="number"
@@ -453,15 +390,15 @@ input[readonly] {
             oninput="saveAndCalculate()"
         >
     </td>
+    <td><input type="text" id="hist_6" class="history-cell-input" readonly></td>
 </tr>
 
-<!-- Row 4: Total & Pure M+ Value Display Beside Total -->
+<!-- Row 4: Total & M Accumulator Display -->
 <tr>
-    <td></td>
-    <td colspan="2">
-        <input type="text" id="m_display" value="" readonly style="font-size:12px; font-weight:bold; color:#1d4ed8; background:#eff6ff;">
+    <td>
+        <input type="text" id="m_display" value="" readonly style="font-size:11px; font-weight:bold; color:#1d4ed8; background:#eff6ff;" title="Accumulated M+ Total">
     </td>
-    <td class="label-col">Total</td>
+    <td colspan="2" class="label-col">Total</td>
     <td>
         <input
             type="text"
@@ -469,25 +406,13 @@ input[readonly] {
             readonly
         >
     </td>
+    <td><input type="text" id="hist_7" class="history-cell-input" readonly></td>
 </tr>
 
 </table>
 
 <div class="footer-credit">
     created by paulm
-</div>
-
-</div>
-
-<!-- M+ History Sidebar (Right Side) -->
-<div class="history-sidebar">
-    <div class="history-title">
-        <span>M+ Review List</span>
-        <span id="history-count" style="font-weight:normal; color:#94a3b8;">0 items</span>
-    </div>
-    <ul id="history-list" class="history-list">
-        <li style="text-align:center; color:#94a3b8; font-size:11px; padding:12px;">No M+ entries yet</li>
-    </ul>
 </div>
 
 </div>
@@ -582,27 +507,17 @@ function updateMemoryDisplay() {
 }
 
 function updateHistoryDisplay() {
-    let listEl = document.getElementById('history-list');
-    let countEl = document.getElementById('history-count');
-    
-    if (!listEl) return;
-
-    countEl.textContent = memoryHistory.length + (memoryHistory.length === 1 ? ' item' : ' items');
-
-    if (memoryHistory.length === 0) {
-        listEl.innerHTML = '<li style="text-align:center; color:#94a3b8; font-size:11px; padding:12px;">No M+ entries yet</li>';
-        return;
+    // Populate up to 8 history slots in the right column rows (hist_0 to hist_7)
+    for (let i = 0; i < 8; i++) {
+        let histInput = document.getElementById('hist_' + i);
+        if (histInput) {
+            if (memoryHistory[i]) {
+                histInput.value = memoryHistory[i].amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            } else {
+                histInput.value = '';
+            }
+        }
     }
-
-    let html = '';
-    memoryHistory.forEach((item, index) => {
-        let formattedAmt = item.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        html += `<li class="history-item">
-            <span style="color:#64748b; font-weight:600;">#${memoryHistory.length - index}</span>
-            <span class="amount">+${formattedAmt}</span>
-        </li>`;
-    });
-    listEl.innerHTML = html;
 }
 
 
@@ -721,7 +636,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     if (!installButton) {
         installButton = document.createElement('button');
         installButton.textContent = 'Install App';
-        installButton.style.cssText = 'padding: 10px 20px; background-color: #107c41; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 10px; width: 100%; font-weight: 700;';
+        installButton.style.cssText = 'padding: 8px 16px; background-color: #107c41; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 6px; width: 100%; font-weight: 700; font-size: 12px;';
         document.querySelector('.container').insertBefore(installButton, document.querySelector('table'));
         
         installButton.addEventListener('click', async () => {
