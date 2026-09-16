@@ -297,13 +297,28 @@ input[readonly] {
 
 .history-item {
     font-size: 11px;
-    padding: 3px 4px;
+    padding: 2px 3px;
     border-bottom: 1px solid #f1f5f9;
     display: flex;
-    justify-content: center;
     align-items: center;
     color: #1d4ed8;
     font-weight: 600;
+}
+
+.history-input {
+    width: 100%;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #1d4ed8;
+    font-weight: 600;
+    font-size: 11px;
+    text-align: center;
+    padding: 1px;
+}
+
+.history-input:focus {
+    border-color: #3b82f6;
+    background: #fff;
 }
 
 .history-footer {
@@ -540,7 +555,7 @@ input[readonly] {
         <li style="text-align:center; color:#94a3b8; font-size:10px; padding:20px 4px;">No entries</li>
     </ul>
     <div class="history-footer">
-        <input type="text" id="history_total" value="" readonly placeholder="Σ 0">
+        <input type="text" id="history_total" value="" readonly placeholder="0">
     </div>
 </div>
 
@@ -604,12 +619,6 @@ window.onload = function() {
         }
     });
 
-    let savedMemory = localStorage.getItem('order_memory');
-    if (savedMemory !== null) {
-        memoryValue = parseFloat(savedMemory) || 0;
-        updateMemoryDisplay();
-    }
-
     let savedHistory = localStorage.getItem('order_history');
     if (savedHistory !== null) {
         try {
@@ -619,7 +628,7 @@ window.onload = function() {
         }
     }
 
-    updateHistoryDisplay();
+    recalculateMemoryFromHistory();
     calculate();
 };
 
@@ -631,15 +640,42 @@ function memoryAdd() {
     let currentTotal = parseFloat(totalFieldVal) || 0;
     if (currentTotal === 0) return;
 
-    memoryValue += currentTotal;
-    
-    memoryHistory.unshift({
+    // Push to the end so it goes to the bottom? Wait, user requested first to be on top:
+    // Let's use push() so new items append at the bottom, OR push to top if preferred. 
+    // Wait, "let the first be on the top" means index 0 is at the top. So we use push() to add new items at the bottom or unshift() for top. 
+    // Let's push to the end so newest stays at the bottom or unshift to put newest at top?
+    // User said: "yung history bar pal let the first be on the top" -> meaning oldest/first entry stays at the top!
+    memoryHistory.push({
         amount: currentTotal
+    });
+
+    saveAndRefreshHistory();
+}
+
+function updateHistoryItem(index, valueStr) {
+    let cleanVal = parseFloat(valueStr.replace(/,/g, '')) || 0;
+    memoryHistory[index].amount = cleanVal;
+    saveAndRefreshHistory();
+}
+
+function saveAndRefreshHistory() {
+    memoryValue = 0;
+    memoryHistory.forEach(item => {
+        memoryValue += item.amount;
     });
 
     localStorage.setItem('order_memory', memoryValue);
     localStorage.setItem('order_history', JSON.stringify(memoryHistory));
     
+    updateMemoryDisplay();
+    updateHistoryDisplay();
+}
+
+function recalculateMemoryFromHistory() {
+    memoryValue = 0;
+    memoryHistory.forEach(item => {
+        memoryValue += item.amount;
+    });
     updateMemoryDisplay();
     updateHistoryDisplay();
 }
@@ -678,16 +714,15 @@ function updateHistoryDisplay() {
     }
 
     let html = '';
-    memoryHistory.forEach((item) => {
-        let formattedAmt = Math.round(item.amount).toLocaleString();
+    memoryHistory.forEach((item, index) => {
         html += `<li class="history-item">
-            <span>+${formattedAmt}</span>
+            <input type="text" class="history-input" value="+${Math.round(item.amount).toLocaleString()}" onchange="updateHistoryItem(${index}, this.value)" title="Tap to edit entry">
         </li>`;
     });
     listEl.innerHTML = html;
 
     if (totalEl) {
-        totalEl.value = 'Σ ' + Math.round(memoryValue).toLocaleString();
+        totalEl.value = Math.round(memoryValue).toLocaleString();
     }
 }
 
@@ -827,34 +862,4 @@ window.addEventListener('beforeinstallprompt', (e) => {
         installButton = document.createElement('button');
         installButton.textContent = 'Install App';
         installButton.style.cssText = 'padding: 6px 12px; background-color: #107c41; color: white; border: none; border-radius: 3px; cursor: pointer; margin-bottom: 4px; width: 100%; font-weight: 700; font-size: 11px;';
-        document.querySelector('.left-panel').insertBefore(installButton, document.querySelector('table'));
-        
-        installButton.addEventListener('click', async () => {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response: ${outcome}`);
-            deferredPrompt = null;
-            installButton.style.display = 'none';
-        });
-    }
-});
-
-window.addEventListener('appinstalled', () => {
-    console.log('App installed successfully');
-    if (installButton) installButton.style.display = 'none';
-    deferredPrompt = null;
-});
-
-/* Register offline Service Worker */
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => {
-            console.log('ServiceWorker registration failed: ', err);
-        });
-    });
-}
-
-</script>
-
-</body>
-</html>
+        document.querySelector('.left-panel').insertBefore(installButton, document.querySelector('table')
