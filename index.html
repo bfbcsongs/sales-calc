@@ -27,14 +27,46 @@ body {
     font-size: 14px;
 }
 
-.container {
+.main-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: flex-start;
     max-width: 100%;
+}
+
+@media (max-width: 600px) {
+    .main-layout {
+        flex-direction: column;
+    }
+}
+
+.container {
+    flex: 1;
+    min-width: 0;
     background: #ffffff;
     padding: 8px;
     border-radius: 12px;
     box-shadow:
         0 4px 6px -1px rgba(0, 0, 0, 0.1),
         0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.history-sidebar {
+    width: 220px;
+    background: #ffffff;
+    padding: 8px;
+    border-radius: 12px;
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+@media (max-width: 600px) {
+    .history-sidebar {
+        width: 100%;
+    }
 }
 
 table {
@@ -46,7 +78,7 @@ table {
 th,
 td {
     border: 1px solid #e2e8f0;
-    padding: 8px 3px;
+    padding: 8px 2px;
     text-align: center;
     overflow: hidden;
 }
@@ -100,9 +132,9 @@ input[readonly] {
     border-color: #fecaca;
 }
 
-/* Adjusted Column Widths to fit the new left column */
+/* Adjusted Column Widths */
 .mem-col {
-    width: 15%;
+    width: 14%;
 }
 
 .qty-col {
@@ -110,7 +142,7 @@ input[readonly] {
 }
 
 .price-col {
-    width: 23%;
+    width: 22%;
 }
 
 .label-col {
@@ -122,7 +154,7 @@ input[readonly] {
 }
 
 .amt-col {
-    width: 26%;
+    width: 28%;
 }
 
 .auto-formula {
@@ -186,16 +218,6 @@ input[readonly] {
     color: #dc2626;
 }
 
-.history-container {
-    margin-top: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: #f8fafc;
-    padding: 8px;
-    max-height: 180px;
-    overflow-y: auto;
-}
-
 .history-title {
     font-size: 11px;
     font-weight: 700;
@@ -211,12 +233,14 @@ input[readonly] {
     list-style: none;
     padding: 0;
     margin: 0;
+    max-height: 320px;
+    overflow-y: auto;
 }
 
 .history-item {
     font-size: 12px;
     padding: 6px 8px;
-    background: #ffffff;
+    background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     margin-bottom: 4px;
@@ -241,6 +265,8 @@ input[readonly] {
 </head>
 
 <body>
+
+<div class="main-layout">
 
 <div class="container">
 
@@ -447,19 +473,21 @@ input[readonly] {
 
 </table>
 
-<!-- M+ History Log Section -->
-<div class="history-container">
+<div class="footer-credit">
+    created by paulm
+</div>
+
+</div>
+
+<!-- M+ History Sidebar (Right Side) -->
+<div class="history-sidebar">
     <div class="history-title">
         <span>M+ Review List</span>
         <span id="history-count" style="font-weight:normal; color:#94a3b8;">0 items</span>
     </div>
     <ul id="history-list" class="history-list">
-        <li style="text-align:center; color:#94a3b8; font-size:11px; padding:6px;">No M+ entries yet</li>
+        <li style="text-align:center; color:#94a3b8; font-size:11px; padding:12px;">No M+ entries yet</li>
     </ul>
-</div>
-
-<div class="footer-credit">
-    created by paulm
 </div>
 
 </div>
@@ -520,7 +548,7 @@ function memoryAdd() {
 
     memoryValue += currentTotal;
     
-    // Save only the pure amount value into history (no date/time)
+    // Save only the pure amount value into history
     memoryHistory.unshift({
         amount: currentTotal
     });
@@ -562,7 +590,7 @@ function updateHistoryDisplay() {
     countEl.textContent = memoryHistory.length + (memoryHistory.length === 1 ? ' item' : ' items');
 
     if (memoryHistory.length === 0) {
-        listEl.innerHTML = '<li style="text-align:center; color:#94a3b8; font-size:11px; padding:6px;">No M+ entries yet</li>';
+        listEl.innerHTML = '<li style="text-align:center; color:#94a3b8; font-size:11px; padding:12px;">No M+ entries yet</li>';
         return;
     }
 
