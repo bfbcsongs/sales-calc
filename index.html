@@ -862,4 +862,33 @@ window.addEventListener('beforeinstallprompt', (e) => {
         installButton = document.createElement('button');
         installButton.textContent = 'Install App';
         installButton.style.cssText = 'padding: 6px 12px; background-color: #107c41; color: white; border: none; border-radius: 3px; cursor: pointer; margin-bottom: 4px; width: 100%; font-weight: 700; font-size: 11px;';
-        document.querySelector('.left-panel').insertBefore(installButton, document.querySelector('table')
+        document.querySelector('.left-panel').insertBefore(installButton, document.querySelector('table'));
+        
+        installButton.addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response: ${outcome}`);
+            deferredPrompt = null;
+            installButton.style.display = 'none';
+        });
+    }
+});
+    window.addEventListener('appinstalled', () => {
+    console.log('App installed successfully');
+    if (installButton) installButton.style.display = 'none';
+    deferredPrompt = null;
+});
+
+/* Register offline Service Worker */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+}
+
+</script>
+
+</body>
+</html>
