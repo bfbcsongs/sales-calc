@@ -25,7 +25,6 @@ table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 th, td { border: 1px solid #e2e8f0; padding: 3px 1px; text-align: center; overflow: hidden; height: 26px; }
 th { background-color: #f1f5f9; font-size: 9px; font-weight: 700; color: #475569; text-transform: uppercase; }
 th.key-header { cursor: pointer; user-select: none; font-size: 12px; }
-th.save-header { cursor: pointer; user-select: none; background-color: #dbeafe; color: #1d4ed8; }
 .col-name { width: 20%; }
 .col-num  { width: 10%; }
 .col-amt  { width: 20%; }
@@ -37,8 +36,6 @@ input:focus { outline: none; border-color: #3b82f6; background-color: #fff; box-
 input[readonly] { background-color: transparent; color: #334155; }
 tr.active-row td { background-color: #eff6ff !important; border-color: #bfdbfe; }
 tr.active-row input { color: #1d4ed8; font-weight: 600; }
-tr.saved-row td { background-color: #f0fdf4 !important; }
-tr.saved-row input { color: #15803d; font-weight: 600; }
 tr.total-row td { background-color: #fef2f2 !important; font-weight: 700; color: #dc2626; }
 tr.total-row input { color: #dc2626; font-weight: 700; }
 </style>
@@ -51,7 +48,6 @@ tr.total-row input { color: #dc2626; font-weight: 700; }
 
 <script>
 let keyTapCount = 0; let keyTimer = null;
-let saveTapCount = 0; let saveTimer = null;
 let isNameUnlocked = false; 
 let activeRowIndex = 0; 
 const TOTAL_ROWS = 17;
@@ -70,7 +66,7 @@ function buildTable() {
         <th class="col-num">Fresh</th>
         <th class="col-num">Cab</th>
         <th class="col-num">BO</th>
-        <th class="col-num save-header" onclick="handleSaveTap()" title="1 tap: SAVE row | 3 taps: CLEAR ALL">SAVE</th>
+        <th class="col-num">Payment</th>
         <th class="col-num">Bal</th>
         <th class="col-amt">Amount</th>
     </tr>`;
@@ -115,40 +111,6 @@ function handleKeyTap() {
     }
 }
 
-function handleSaveTap() {
-    saveTapCount++;
-    clearTimeout(saveTimer);
-    if (saveTapCount >= 3) {
-        // 3 taps on SAVE header = CLEAR ALL rows data
-        clearAllRows();
-        saveTapCount = 0;
-    } else {
-        saveTimer = setTimeout(() => {
-            // 1 tap on SAVE header = SAVE current active row explicitly
-            saveActiveRowManually();
-            saveTapCount = 0;
-        }, 500);
-    }
-}
-
-function saveActiveRowManually() {
-    saveRow(activeRowIndex, true);
-    let tr = document.getElementById(`row_${activeRowIndex}`);
-    if (tr) {
-        tr.classList.add('saved-row');
-        setTimeout(() => tr.classList.remove('saved-row'), 1000);
-    }
-}
-
-function clearAllRows() {
-    for (let i = 0; i < TOTAL_ROWS - 1; i++) {
-        localStorage.removeItem(`ext_row_${i}`);
-        localStorage.removeItem(`ext_saved_${i}`);
-    }
-    loadRowData(activeRowIndex);
-    calculateGrandTotals();
-}
-
 function toggleNameLock() {
     isNameUnlocked = !isNameUnlocked;
     for (let i = 0; i < TOTAL_ROWS - 1; i++) {
@@ -166,10 +128,22 @@ function selectRow(index) {
     if (index === TOTAL_ROWS - 1) return;
     if (activeRowIndex === index) return;
     
-    // Do not auto-overwrite if the previous row was explicitly saved
+    saveRow(activeRowIndex);
     activeRowIndex = index;
     highlightActiveRow();
     loadRowData(activeRowIndex);
+
+    // Auto-clear main calculator inputs when switching to a new/blank row
+    clearMainCalculator();
+}
+
+function clearMainCalculator() {
+    localStorage.removeItem('order_qty_dry');
+    localStorage.removeItem('order_qty_fresh');
+    localStorage.removeItem('order_qty_cab');
+    localStorage.removeItem('order_qty_bo');
+    localStorage.removeItem('order_payment');
+    localStorage.removeItem('order_bal');
 }
 
 function highlightActiveRow() {
@@ -203,7 +177,7 @@ function calculateRowAmount(index) {
     if (amtEl) amtEl.value = amt !== 0 ? Math.round(amt).toLocaleString() : '';
 }
 
-function saveRow(index, isExplicitSave = false) {
+function saveRow(index) {
     let data = {
         name: document.getElementById(`name_${index}`).value,
         dry: document.getElementById(`dry_${index}`).value,
@@ -214,9 +188,6 @@ function saveRow(index, isExplicitSave = false) {
         bal: document.getElementById(`bal_${index}`).value
     };
     localStorage.setItem(`ext_row_${index}`, JSON.stringify(data));
-    if (isExplicitSave) {
-        localStorage.setItem(`ext_saved_${index}`, 'true');
-    }
 }
 
 function loadRowData(index) {
@@ -233,7 +204,6 @@ function loadRowData(index) {
             document.getElementById(`bal_${index}`).value = data.bal || '';
         } catch(e) {}
     } else {
-        // Clear inputs for clean row if nothing saved
         document.getElementById(`dry_${index}`).value = '';
         document.getElementById(`fresh_${index}`).value = '';
         document.getElementById(`cab_${index}`).value = '';
@@ -247,14 +217,11 @@ function loadRowData(index) {
 }
 
 function syncWithMainApp() {
-    let isSaved = localStorage.getItem(`ext_saved_${activeRowIndex}`) === 'true';
-    if (isSaved) return; // Stop syncing from main if this row is already saved/locked
-
     let mDry = localStorage.getItem('order_qty_dry') || '';
     let mFresh = localStorage.getItem('order_qty_fresh') || '';
     let mCab = localStorage.getItem('order_qty_cab') || '';
     let mBo = localStorage.getItem('order_qty_bo') || '';
-    let mPayment = localStorage.getItem('order_total') || ''; // Main total mapped to payment field
+    let mPayment = localStorage.getItem('order_payment') || '';
     let mBal = localStorage.getItem('order_bal') || '';
 
     let dEl = document.getElementById(`dry_${activeRowIndex}`);
