@@ -20,7 +20,7 @@
 
 body {
     margin: 0;
-    padding: 6px;
+    padding: 4px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: #f8fafc;
     color: #334155;
@@ -29,7 +29,7 @@ body {
 
 .main-layout {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     align-items: flex-start;
     max-width: 100%;
 }
@@ -38,16 +38,16 @@ body {
     flex: 1;
     min-width: 0;
     background: #ffffff;
-    padding: 6px;
-    border-radius: 10px;
+    padding: 4px;
+    border-radius: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
 .right-panel {
-    width: 130px;
+    width: 125px;
     background: #ffffff;
-    padding: 6px;
-    border-radius: 10px;
+    padding: 4px;
+    border-radius: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2e8f0;
     display: flex;
@@ -63,7 +63,7 @@ table {
 th,
 td {
     border: 1px solid #e2e8f0;
-    padding: 5px 2px;
+    padding: 4px 1px;
     text-align: center;
     overflow: hidden;
 }
@@ -88,10 +88,10 @@ th.price-header:active {
 
 input {
     width: 100%;
-    padding: 4px 2px;
+    padding: 3px 1px;
     text-align: center;
     border: 1px solid #cbd5e1;
-    border-radius: 4px;
+    border-radius: 3px;
     font-size: 12px;
     background-color: #fff;
     transition: all 0.2s;
@@ -117,17 +117,17 @@ input[readonly] {
     border-color: #fecaca;
 }
 
-/* Column Widths */
-.qty-col { width: 20%; }
-.price-col { width: 26%; }
+/* Optimized Column Widths (Max QTY space) */
+.qty-col { width: 28%; }
+.price-col { width: 20%; }
 .label-col { 
-    width: 22%; 
+    width: 18%; 
     font-weight: 600; 
     font-size: 11px; 
     color: #1e293b; 
     background-color: #f8fafc; 
 }
-.amt-col { width: 32%; }
+.amt-col { width: 34%; }
 
 .utility-row {
     background-color: #f8fafc;
@@ -135,17 +135,17 @@ input[readonly] {
 
 .auto-formula {
     text-align: left;
-    font-size: 9px;
+    font-size: 8px;
     font-style: italic;
     color: #94a3b8;
-    padding-left: 4px;
+    padding-left: 2px;
 }
 
 .clear-button {
     width: 100%;
-    padding: 4px 6px;
+    padding: 3px 4px;
     border: 1px solid #fecaca;
-    border-radius: 4px;
+    border-radius: 3px;
     background-color: #fef2f2;
     color: #dc2626;
     font-size: 10px;
@@ -160,9 +160,9 @@ input[readonly] {
 
 .mem-btn {
     width: 100%;
-    padding: 4px 2px;
+    padding: 3px 1px;
     border: 1px solid #cbd5e1;
-    border-radius: 4px;
+    border-radius: 3px;
     background-color: #e2e8f0;
     color: #1e293b;
     font-size: 10px;
@@ -197,8 +197,8 @@ input[readonly] {
     background-color: #f1f5f9;
     border: 1px solid #e2e8f0;
     text-align: center;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
 
 .history-list {
@@ -214,7 +214,7 @@ input[readonly] {
 
 .history-item {
     font-size: 11px;
-    padding: 3px 6px;
+    padding: 3px 4px;
     border-bottom: 1px solid #f1f5f9;
     display: flex;
     justify-content: space-between;
@@ -227,8 +227,8 @@ input[readonly] {
     border: 1px solid #bfdbfe;
     background-color: #eff6ff;
     padding: 4px;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
     text-align: center;
 }
 
@@ -244,9 +244,9 @@ input[readonly] {
 .footer-credit {
     text-align: center;
     font-style: italic;
-    font-size: 10px;
+    font-size: 9px;
     color: #94a3b8;
-    margin-top: 6px;
+    margin-top: 4px;
 }
 </style>
 </head>
@@ -453,7 +453,7 @@ input[readonly] {
         <li style="text-align:center; color:#94a3b8; font-size:10px; padding:20px 4px;">No entries</li>
     </ul>
     <div class="history-footer">
-        <input type="text" id="history_total" value="" readonly placeholder="Total: 0.00">
+        <input type="text" id="history_total" value="" readonly placeholder="Total: 0">
     </div>
 </div>
 
@@ -544,7 +544,7 @@ function memoryRecall() {
 function updateMemoryDisplay() {
     let mDisplay = document.getElementById('m_display');
     if (mDisplay) {
-        mDisplay.value = memoryValue !== 0 ? memoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '';
+        mDisplay.value = memoryValue !== 0 ? Math.round(memoryValue).toLocaleString() : '';
     }
 }
 
@@ -562,7 +562,7 @@ function updateHistoryDisplay() {
 
     let html = '';
     memoryHistory.forEach((item, index) => {
-        let formattedAmt = item.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        let formattedAmt = Math.round(item.amount).toLocaleString();
         html += `<li class="history-item">
             <span style="color:#64748b; font-size:10px;">#${memoryHistory.length - index}</span>
             <span>+${formattedAmt}</span>
@@ -571,7 +571,7 @@ function updateHistoryDisplay() {
     listEl.innerHTML = html;
 
     if (totalEl) {
-        totalEl.value = 'Σ ' + memoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        totalEl.value = 'Σ ' + Math.round(memoryValue).toLocaleString();
     }
 }
 
@@ -654,7 +654,7 @@ function calculate() {
     let setVal = (id, val) => {
         let el = document.getElementById(id);
         if (el) {
-            el.value = (val && val !== 0) ? val.toFixed(2) : '';
+            el.value = (val && val !== 0) ? Math.round(val).toLocaleString() : '';
         }
     };
 
@@ -691,7 +691,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     if (!installButton) {
         installButton = document.createElement('button');
         installButton.textContent = 'Install App';
-        installButton.style.cssText = 'padding: 8px 16px; background-color: #107c41; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 6px; width: 100%; font-weight: 700; font-size: 12px;';
+        installButton.style.cssText = 'padding: 6px 12px; background-color: #107c41; color: white; border: none; border-radius: 3px; cursor: pointer; margin-bottom: 4px; width: 100%; font-weight: 700; font-size: 11px;';
         document.querySelector('.left-panel').insertBefore(installButton, document.querySelector('table'));
         
         installButton.addEventListener('click', async () => {
