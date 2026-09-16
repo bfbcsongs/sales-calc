@@ -30,7 +30,7 @@ body {
 .main-layout {
     display: flex;
     gap: 4px;
-    align-items: flex-start;
+    align-items: stretch;
     max-width: 100%;
 }
 
@@ -41,6 +41,9 @@ body {
     padding: 4px;
     border-radius: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .right-panel {
@@ -187,7 +190,7 @@ input[readonly] {
     color: #dc2626;
 }
 
-/* Right Panel History List Styles */
+/* Right Panel History List Styles (Proportional Height) */
 .history-header {
     font-size: 9px;
     font-weight: 700;
@@ -205,7 +208,7 @@ input[readonly] {
     list-style: none;
     padding: 0;
     margin: 0;
-    height: 235px;
+    flex: 1;
     overflow-y: auto;
     border-left: 1px solid #e2e8f0;
     border-right: 1px solid #e2e8f0;
@@ -257,6 +260,7 @@ input[readonly] {
 
 <!-- Left Panel: Main Order Calculator -->
 <div class="left-panel">
+<div>
 <table>
 <tr>
     <th class="qty-col">QTY</th>
@@ -440,13 +444,14 @@ input[readonly] {
 </tr>
 
 </table>
+</div>
 
 <div class="footer-credit">
     created by paulm
 </div>
 </div>
 
-<!-- Right Panel: M+ History List (15+ items capacity with Total at bottom) -->
+<!-- Right Panel: M+ History List -->
 <div class="right-panel">
     <div class="history-header">M+ History</div>
     <ul id="history-list" class="history-list">
@@ -510,12 +515,13 @@ let memoryValue = 0;
 let memoryHistory = [];
 
 function memoryAdd() {
-    let currentTotal = parseFloat(document.getElementById('total').value) || 0;
+    let totalFieldVal = document.getElementById('total').value.replace(/,/g, '');
+    let currentTotal = parseFloat(totalFieldVal) || 0;
     if (currentTotal === 0) return; // Don't add zero totals
 
     memoryValue += currentTotal;
     
-    // Save amount into history stack
+    // Save exact amount into history stack
     memoryHistory.unshift({
         amount: currentTotal
     });
