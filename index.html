@@ -27,6 +27,13 @@ body {
     font-size: 13px;
 }
 
+.app-container {
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .main-layout {
     display: flex;
     gap: 4px;
@@ -55,6 +62,38 @@ body {
     border: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
+}
+
+/* Quick Access Bottom Panel Styles */
+.quick-panel {
+    background: #ffffff;
+    padding: 4px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.quick-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.quick-table th {
+    background-color: #f1f5f9;
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    border: 1px solid #e2e8f0;
+    padding: 3px 1px;
+    text-align: center;
+}
+
+.quick-table td {
+    border: 1px solid #e2e8f0;
+    padding: 3px 2px;
+    text-align: center;
 }
 
 table {
@@ -256,6 +295,8 @@ input[readonly] {
 
 <body>
 
+<div class="app-container">
+
 <div class="main-layout">
 
 <!-- Left Panel: Main Order Calculator -->
@@ -281,7 +322,7 @@ input[readonly] {
             type="number"
             id="qty_dry"
             placeholder=""
-            oninput="saveAndCalculate()"
+            oninput="syncAndCalculate('qty_dry')"
         >
     </td>
     <td>
@@ -305,7 +346,7 @@ input[readonly] {
             type="number"
             id="qty_fresh"
             placeholder=""
-            oninput="saveAndCalculate()"
+            oninput="syncAndCalculate('qty_fresh')"
         >
     </td>
     <td>
@@ -329,7 +370,7 @@ input[readonly] {
             type="number"
             id="qty_cab"
             placeholder=""
-            oninput="saveAndCalculate()"
+            oninput="syncAndCalculate('qty_cab')"
         >
     </td>
     <td>
@@ -353,7 +394,7 @@ input[readonly] {
             type="number"
             id="qty_bo"
             placeholder=""
-            oninput="saveAndCalculate()"
+            oninput="syncAndCalculate('qty_bo')"
         >
     </td>
     <td>
@@ -464,6 +505,26 @@ input[readonly] {
 
 </div>
 
+<!-- Bottom Quick Access Panel (Near Dialpad) -->
+<div class="quick-panel">
+    <table class="quick-table">
+        <tr>
+            <th>Dry</th>
+            <th>Fresh</th>
+            <th>Cab</th>
+            <th>Bo</th>
+        </tr>
+        <tr>
+            <td><input type="number" id="quick_qty_dry" placeholder="" oninput="syncAndCalculate('quick_qty_dry')"></td>
+            <td><input type="number" id="quick_qty_fresh" placeholder="" oninput="syncAndCalculate('quick_qty_fresh')"></td>
+            <td><input type="number" id="quick_qty_cab" placeholder="" oninput="syncAndCalculate('quick_qty_cab')"></td>
+            <td><input type="number" id="quick_qty_bo" placeholder="" oninput="syncAndCalculate('quick_qty_bo')"></td>
+        </tr>
+    </table>
+</div>
+
+</div>
+
 <script>
 
 let tapCount = 0;
@@ -489,6 +550,11 @@ window.onload = function() {
         let savedVal = localStorage.getItem('order_' + id);
         if (savedVal !== null) {
             document.getElementById(id).value = savedVal;
+            // Sync to bottom quick inputs if it's a qty
+            if (id.startsWith('qty_')) {
+                let quickEl = document.getElementById('quick_' + id);
+                if (quickEl) quickEl.value = savedVal;
+            }
         }
     });
 
@@ -517,11 +583,10 @@ let memoryHistory = [];
 function memoryAdd() {
     let totalFieldVal = document.getElementById('total').value.replace(/,/g, '');
     let currentTotal = parseFloat(totalFieldVal) || 0;
-    if (currentTotal === 0) return; // Don't add zero totals
+    if (currentTotal === 0) return;
 
     memoryValue += currentTotal;
     
-    // Save exact amount into history stack
     memoryHistory.unshift({
         amount: currentTotal
     });
@@ -619,6 +684,23 @@ function togglePricesLock() {
 }
 
 
+/* Sync between top and bottom quick inputs */
+function syncAndCalculate(sourceId) {
+    let val = document.getElementById(sourceId).value;
+
+    if (sourceId.startsWith('quick_')) {
+        let targetId = sourceId.replace('quick_', '');
+        let targetEl = document.getElementById(targetId);
+        if (targetEl) targetEl.value = val;
+    } else {
+        let quickEl = document.getElementById('quick_' + sourceId);
+        if (quickEl) quickEl.value = val;
+    }
+
+    saveAndCalculate();
+}
+
+
 /* Save and calculate */
 function saveAndCalculate() {
     inputIds.forEach(id => {
@@ -643,6 +725,8 @@ function clearQuantities() {
     fieldsToClear.forEach(id => {
         let el = document.getElementById(id);
         if (el) { el.value = ''; }
+        let quickEl = document.getElementById('quick_' + id);
+        if (quickEl) { quickEl.value = ''; }
         localStorage.removeItem('order_' + id);
     });
 
