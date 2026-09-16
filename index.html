@@ -44,7 +44,7 @@ body {
 }
 
 .right-panel {
-    width: 125px;
+    width: 95px;
     background: #ffffff;
     padding: 4px;
     border-radius: 8px;
@@ -217,7 +217,7 @@ input[readonly] {
     padding: 3px 4px;
     border-bottom: 1px solid #f1f5f9;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     color: #1d4ed8;
     font-weight: 600;
@@ -237,7 +237,7 @@ input[readonly] {
     border: none;
     color: #1d4ed8;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 10px;
     padding: 0;
 }
 
@@ -453,7 +453,7 @@ input[readonly] {
         <li style="text-align:center; color:#94a3b8; font-size:10px; padding:20px 4px;">No entries</li>
     </ul>
     <div class="history-footer">
-        <input type="text" id="history_total" value="" readonly placeholder="Total: 0">
+        <input type="text" id="history_total" value="" readonly placeholder="Σ 0">
     </div>
 </div>
 
@@ -561,10 +561,9 @@ function updateHistoryDisplay() {
     }
 
     let html = '';
-    memoryHistory.forEach((item, index) => {
+    memoryHistory.forEach((item) => {
         let formattedAmt = Math.round(item.amount).toLocaleString();
         html += `<li class="history-item">
-            <span style="color:#64748b; font-size:10px;">#${memoryHistory.length - index}</span>
             <span>+${formattedAmt}</span>
         </li>`;
     });
