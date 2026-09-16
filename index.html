@@ -181,6 +181,50 @@ input[readonly] {
     color: #dc2626;
 }
 
+.history-container {
+    margin-top: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 8px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.history-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-item {
+    font-size: 12px;
+    padding: 6px 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-item span.amount {
+    font-weight: 700;
+    color: #1d4ed8;
+}
+
 .footer-credit {
     text-align: center;
     font-style: italic;
@@ -388,6 +432,17 @@ input[readonly] {
 
 </table>
 
+<!-- M+ History Log Section -->
+<div class="history-container">
+    <div class="history-title">
+        <span>M+ Review List</span>
+        <span id="history-count" style="font-weight:normal; color:#94a3b8;">0 items</span>
+    </div>
+    <ul id="history-list" class="history-list">
+        <li style="text-align:center; color:#94a3b8; font-size:11px; padding:6px;">No M+ entries yet</li>
+    </ul>
+</div>
+
 <div class="footer-credit">
     created by paulm
 </div>
@@ -428,22 +483,51 @@ window.onload = function() {
         updateMemoryDisplay();
     }
 
+    let savedHistory = localStorage.getItem('order_history');
+    if (savedHistory !== null) {
+        try {
+            memoryHistory = JSON.parse(savedHistory);
+        } catch(e) {
+            memoryHistory = [];
+        }
+    }
+
+    updateHistoryDisplay();
     calculate();
 };
 
 let memoryValue = 0;
+let memoryHistory = [];
 
 function memoryAdd() {
     let currentTotal = parseFloat(document.getElementById('total').value) || 0;
+    if (currentTotal === 0) return; // Don't add zero totals
+
     memoryValue += currentTotal;
+    
+    // Create history item record with timestamp
+    let now = new Date();
+    let timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    memoryHistory.unshift({
+        time: timeStr,
+        amount: currentTotal
+    });
+
     localStorage.setItem('order_memory', memoryValue);
+    localStorage.setItem('order_history', JSON.stringify(memoryHistory));
+    
     updateMemoryDisplay();
+    updateHistoryDisplay();
 }
 
 function memoryClear() {
     memoryValue = 0;
+    memoryHistory = [];
     localStorage.removeItem('order_memory');
+    localStorage.removeItem('order_history');
     updateMemoryDisplay();
+    updateHistoryDisplay();
 }
 
 function memoryRecall() {
@@ -456,6 +540,30 @@ function updateMemoryDisplay() {
     if (mDisplay) {
         mDisplay.value = memoryValue !== 0 ? memoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '';
     }
+}
+
+function updateHistoryDisplay() {
+    let listEl = document.getElementById('history-list');
+    let countEl = document.getElementById('history-count');
+    
+    if (!listEl) return;
+
+    countEl.textContent = memoryHistory.length + (memoryHistory.length === 1 ? ' item' : ' items');
+
+    if (memoryHistory.length === 0) {
+        listEl.innerHTML = '<li style="text-align:center; color:#94a3b8; font-size:11px; padding:6px;">No M+ entries yet</li>';
+        return;
+    }
+
+    let html = '';
+    memoryHistory.forEach((item, index) => {
+        let formattedAmt = item.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        html += `<li class="history-item">
+            <span style="color:#64748b;">#${memoryHistory.length - index} (${item.time})</span>
+            <span class="amount">+${formattedAmt}</span>
+        </li>`;
+    });
+    listEl.innerHTML = html;
 }
 
 
