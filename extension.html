@@ -132,8 +132,6 @@ function selectRow(index) {
     activeRowIndex = index;
     highlightActiveRow();
     loadRowData(activeRowIndex);
-
-    // Auto-clear main calculator inputs when switching to a new/blank row
     clearMainCalculator();
 }
 
@@ -171,10 +169,16 @@ function calculateRowAmount(index) {
     let fresh = getVal(`fresh_${index}`);
     let cab = getVal(`cab_${index}`);
     let bo = getVal(`bo_${index}`);
+    let payment = getVal(`payment_${index}`);
+    let bal = getVal(`bal_${index}`);
     
-    let amt = (dry * 45) + (fresh * 45) + (cab * 40) - ((bo / 2) * 45);
+    // Subtotal formula matching main app: (Dry*45) + (Fresh*45) + (Cab*40) - ((BO/2)*45)
+    let subTotal = (dry * 45) + (fresh * 45) + (cab * 40) - ((bo / 2) * 45);
+    // Total formula matching main app: SubTotal - Payment + Bal
+    let totalAmt = subTotal - payment + bal;
+    
     let amtEl = document.getElementById(`amt_${index}`);
-    if (amtEl) amtEl.value = amt !== 0 ? Math.round(amt).toLocaleString() : '';
+    if (amtEl) amtEl.value = totalAmt !== 0 ? Math.round(totalAmt).toLocaleString() : '';
 }
 
 function saveRow(index) {
