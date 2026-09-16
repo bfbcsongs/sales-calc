@@ -3,306 +3,296 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Order Sheet</title>
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#107c41">
 <style>
 * { box-sizing: border-box; }
 body {
     margin: 0;
     padding: 2px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #f8fafc;
-    color: #334155;
-    font-size: 13px;
+    background-color: transparent;
+    font-size: 12px;
 }
-.app-container { max-width: 100%; display: flex; flex-direction: column; gap: 2px; }
-.main-layout { display: flex; gap: 2px; align-items: stretch; max-width: 100%; }
-.left-panel {
-    flex: 1; min-width: 0; background: #ffffff; padding: 3px;
-    border-radius: 6px; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between;
-}
-.right-panel {
-    width: 110px; background: #ffffff; padding: 4px;
-    border-radius: 6px; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 6px; justify-content: center;
-}
-.bottom-bar { display: flex; gap: 2px; align-items: stretch; width: 100%; }
-.quick-panel {
-    flex: 1; min-width: 0; background: #ffffff; padding: 3px;
-    border-radius: 6px; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;
-}
-.quick-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.quick-table th {
-    background-color: #f1f5f9; font-size: 10px; font-weight: 700; color: #475569;
-    text-transform: uppercase; border: 1px solid #e2e8f0; padding: 3px 1px; text-align: center;
-}
-.quick-table td { border: 1px solid #e2e8f0; padding: 3px 2px; text-align: center; }
-.bottom-m-panel {
-    width: 95px; background: #ffffff; padding: 3px;
-    border-radius: 6px; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;
-}
-.bottom-m-btn {
-    width: 100%; height: 100%; min-height: 44px; border: 1px solid #bfdbfe;
-    border-radius: 4px; background-color: #dbeafe; color: #1d4ed8; font-size: 13px; font-weight: 700; cursor: pointer;
+.ext-container {
+    background: #ffffff;
+    padding: 3px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    width: 100%;
+    overflow-x: auto;
 }
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-th, td { border: 1px solid #e2e8f0; padding: 4px 1px; text-align: center; overflow: hidden; }
-th { background-color: #f1f5f9; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; }
-th.price-header { cursor: pointer; user-select: none; }
+th, td { border: 1px solid #e2e8f0; padding: 3px 1px; text-align: center; overflow: hidden; height: 26px; }
+th { background-color: #f1f5f9; font-size: 9px; font-weight: 700; color: #475569; text-transform: uppercase; }
+.col-name { width: 20%; }
+.col-num  { width: 10%; }
+.col-amt  { width: 20%; }
 input {
-    width: 100%; padding: 3px 1px; text-align: center;
-    border: 1px solid #cbd5e1; border-radius: 3px; font-size: 12px; background-color: #fff;
+    width: 100%; height: 100%; padding: 1px; text-align: center;
+    border: 1px solid transparent; border-radius: 2px; font-size: 11px; background-color: transparent;
 }
-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); }
-input[readonly] { background-color: #f8fafc; color: #475569; font-weight: 500; border-color: #e2e8f0; }
-#total { color: #dc2626; font-weight: 700; background-color: #fef2f2; border-color: #fecaca; }
-.qty-col { width: 28%; }
-.price-col { width: 20%; }
-.label-col { width: 18%; font-weight: 600; font-size: 11px; color: #1e293b; background-color: #f8fafc; }
-.amt-col { width: 34%; }
-.utility-row { background-color: #f8fafc; }
-.auto-formula { text-align: left; font-size: 8px; font-style: italic; color: #94a3b8; padding-left: 2px; }
-.clear-button {
-    width: 100%; padding: 3px 4px; border: 1px solid #fecaca; border-radius: 3px;
-    background-color: #fef2f2; color: #dc2626; font-size: 10px; font-weight: 700; cursor: pointer;
-}
-.mem-btn {
-    width: 100%; padding: 3px 1px; border: 1px solid #cbd5e1; border-radius: 3px;
-    background-color: #e2e8f0; color: #1e293b; font-size: 10px; font-weight: 700; cursor: pointer;
-}
-.mem-btn.m-plus { background-color: #dbeafe; border-color: #bfdbfe; color: #1d4ed8; }
-.mem-btn.mc { background-color: #fee2e2; border-color: #fecaca; color: #dc2626; }
-
-/* Right Panel Action Buttons */
-.side-btn {
-    width: 100%; padding: 10px 4px; border: 1px solid #cbd5e1; border-radius: 4px;
-    font-size: 11px; font-weight: 700; cursor: pointer; text-align: center;
-}
-.side-btn.open { background-color: #dbeafe; border-color: #bfdbfe; color: #1d4ed8; }
-.side-btn.clear { background-color: #fee2e2; border-color: #fecaca; color: #dc2626; }
-.footer-credit { text-align: center; font-style: italic; font-size: 9px; color: #94a3b8; margin-top: 2px; }
+input:focus { outline: none; border-color: #3b82f6; background-color: #fff; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); }
+input[readonly] { background-color: transparent; color: #334155; }
+tr.active-row td { background-color: #eff6ff !important; border-color: #bfdbfe; }
+tr.active-row input { color: #1d4ed8; font-weight: 600; }
+tr.total-row td { background-color: #fef2f2 !important; font-weight: 700; color: #dc2626; }
+tr.total-row input { color: #dc2626; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<div class="app-container">
-<div class="main-layout">
-<div class="left-panel">
-<div>
-<table>
-<tr>
-    <th class="qty-col">QTY</th>
-    <th class="price-col price-header" onclick="handlePriceHeaderTap()" title="Tap 5 times">Unit Price</th>
-    <th class="label-col">A</th>
-    <th class="amt-col">Amount</th>
-</tr>
-<tr>
-    <td><input type="number" id="qty_dry" oninput="syncAndCalculate('qty_dry')"></td>
-    <td><input type="number" id="price_dry" value="45" readonly oninput="saveAndCalculate()"></td>
-    <td class="label-col">Dry</td>
-    <td><input type="text" id="amt_dry" readonly></td>
-</tr>
-<tr>
-    <td><input type="number" id="qty_fresh" oninput="syncAndCalculate('qty_fresh')"></td>
-    <td><input type="number" id="price_fresh" value="45" readonly oninput="saveAndCalculate()"></td>
-    <td class="label-col">Fresh</td>
-    <td><input type="text" id="amt_fresh" readonly></td>
-</tr>
-<tr>
-    <td><input type="number" id="qty_cab" oninput="syncAndCalculate('qty_cab')"></td>
-    <td><input type="number" id="price_cab" value="40" readonly oninput="saveAndCalculate()"></td>
-    <td class="label-col">Cab</td>
-    <td><input type="text" id="amt_cab" readonly></td>
-</tr>
-<tr>
-    <td><input type="number" id="qty_bo" oninput="syncAndCalculate('qty_bo')"></td>
-    <td><input type="number" id="price_bo" value="45" readonly oninput="saveAndCalculate()"></td>
-    <td class="label-col">BO</td>
-    <td><input type="text" id="amt_bo" readonly></td>
-</tr>
-<tr class="utility-row">
-    <td colspan="2" class="auto-formula">Auto: (BO ÷ 2) × Price</td>
-    <td colspan="2"><button class="clear-button" onclick="clearQuantities()">CLEAR QTY</button></td>
-</tr>
-<tr>
-    <td><button class="mem-btn m-plus" onclick="memoryAdd()">M+</button></td>
-    <td colspan="2" class="label-col">Sub Total</td>
-    <td><input type="text" id="subtotal" readonly></td>
-</tr>
-<tr>
-    <td><button class="mem-btn mc" onclick="memoryClear()">MC</button></td>
-    <td colspan="2" class="label-col">Payment</td>
-    <td><input type="number" id="payment" oninput="saveAndCalculate()"></td>
-</tr>
-<tr>
-    <td><button class="mem-btn" onclick="memoryRecall()">MR</button></td>
-    <td colspan="2" class="label-col">Bal</td>
-    <td><input type="number" id="bal" oninput="saveAndCalculate()"></td>
-</tr>
-<tr>
-    <td><input type="text" id="m_display" readonly style="font-size:10px; font-weight:bold; color:#1d4ed8; background:#eff6ff;"></td>
-    <td colspan="2" class="label-col">Total</td>
-    <td><input type="text" id="total" readonly></td>
-</tr>
-</table>
-</div>
-<div class="footer-credit">created by paulm</div>
-</div>
-
-<!-- Dito inilagay ang OPEN ALL at CLEAR buttons sa kanang banda -->
-<div class="right-panel">
-    <button class="side-btn open" id="mainOpenBtn" onclick="triggerExtOpenAll()">📂 OPEN ALL</button>
-    <button class="side-btn clear" onclick="triggerExtClear()">🗑️ CLEAR</button>
-</div>
-</div>
-
-<div class="bottom-bar">
-    <div class="quick-panel">
-        <table class="quick-table">
-            <tr><th>Dry</th><th>Fresh</th><th>Cab</th><th>Bo</th></tr>
-            <tr>
-                <td><input type="number" id="quick_qty_dry" oninput="syncAndCalculate('quick_qty_dry')"></td>
-                <td><input type="number" id="quick_qty_fresh" oninput="syncAndCalculate('quick_qty_fresh')"></td>
-                <td><input type="number" id="quick_qty_cab" oninput="syncAndCalculate('quick_qty_cab')"></td>
-                <td><input type="number" id="quick_qty_bo" oninput="syncAndCalculate('quick_qty_bo')"></td>
-            </tr>
-        </table>
-    </div>
-    <div class="bottom-m-panel">
-        <button class="bottom-m-btn" onclick="memoryAdd()">M+</button>
-    </div>
-</div>
-
-<!-- Extension Table Frame sa Ibaba -->
-<iframe src="extension.html" style="width:100%; height:500px; border:none; border-radius:6px; margin-top:4px; background:transparent;" id="extFrame"></iframe>
-
+<div class="ext-container">
+    <table id="extTable"></table>
 </div>
 
 <script>
-let tapCount = 0; let tapTimer = null; let isPricesUnlocked = false;
-const inputIds = ['qty_dry', 'price_dry', 'qty_fresh', 'price_fresh', 'qty_cab', 'price_cab', 'qty_bo', 'price_bo', 'payment', 'bal'];
+let isAllOpen = false;
+let activeRowIndex = 0; 
+const TOTAL_ROWS = 17;
 
 window.onload = function() {
-    inputIds.forEach(id => {
-        let savedVal = localStorage.getItem('order_' + id);
-        if (savedVal !== null) {
-            let el = document.getElementById(id);
-            if(el) el.value = savedVal;
-            if (id.startsWith('qty_')) {
-                let quickEl = document.getElementById('quick_' + id);
-                if (quickEl) quickEl.value = savedVal;
-            }
+    buildTable();
+    loadRowData(activeRowIndex);
+    setInterval(syncWithMainApp, 300);
+
+    // Pakikinig sa utos galing sa main page buttons (OPEN ALL / CLEAR)
+    window.addEventListener('message', function(e) {
+        if (e.data === 'toggleOpenAll') {
+            toggleOpenAll();
+        } else if (e.data === 'clearAllRows') {
+            clearAllWhenOpened();
         }
     });
-    calculate();
 };
 
-function triggerExtOpenAll() {
-    let iframe = document.getElementById('extFrame');
-    if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage('toggleOpenAll', '*');
-    }
-}
+function buildTable() {
+    let table = document.getElementById('extTable');
+    let html = `<tr>
+        <th class="col-name">Name</th>
+        <th class="col-num">Dry</th>
+        <th class="col-num">Fresh</th>
+        <th class="col-num">Cab</th>
+        <th class="col-num">BO</th>
+        <th class="col-num">Payment</th>
+        <th class="col-num">Bal</th>
+        <th class="col-amt">Amount</th>
+    </tr>`;
 
-function triggerExtClear() {
-    let iframe = document.getElementById('extFrame');
-    if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage('clearAllRows', '*');
-    }
-}
-
-function handlePriceHeaderTap() {
-    tapCount++;
-    clearTimeout(tapTimer);
-    if (tapCount >= 5) {
-        togglePricesLock();
-        tapCount = 0;
-    } else {
-        tapTimer = setTimeout(() => { tapCount = 0; }, 600);
-    }
-}
-
-function togglePricesLock() {
-    isPricesUnlocked = !isPricesUnlocked;
-    ['price_dry', 'price_fresh', 'price_cab', 'price_bo'].forEach(id => {
-        let input = document.getElementById(id);
-        if (input) {
-            if (isPricesUnlocked) input.removeAttribute('readonly');
-            else input.setAttribute('readonly', 'readonly');
+    for (let i = 0; i < TOTAL_ROWS; i++) {
+        let isTotalRow = (i === TOTAL_ROWS - 1);
+        if (isTotalRow) {
+            html += `<tr id="row_${i}" class="total-row">
+                <td><input type="text" id="name_${i}" value="TOTAL" readonly></td>
+                <td><input type="text" id="dry_${i}" readonly></td>
+                <td><input type="text" id="fresh_${i}" readonly></td>
+                <td><input type="text" id="cab_${i}" readonly></td>
+                <td><input type="text" id="bo_${i}" readonly></td>
+                <td><input type="text" id="payment_${i}" readonly></td>
+                <td><input type="text" id="bal_${i}" readonly></td>
+                <td><input type="text" id="amt_${i}" readonly style="font-weight:700; color:#dc2626;"></td>
+            </tr>`;
+        } else {
+            html += `<tr id="row_${i}" onclick="selectRow(${i})">
+                <td><input type="text" id="name_${i}" value="Client ${i+1}" readonly oninput="saveRow(${i})"></td>
+                <td><input type="number" id="dry_${i}" readonly oninput="onFieldInput(${i})"></td>
+                <td><input type="number" id="fresh_${i}" readonly oninput="onFieldInput(${i})"></td>
+                <td><input type="number" id="cab_${i}" readonly oninput="onFieldInput(${i})"></td>
+                <td><input type="number" id="bo_${i}" readonly oninput="onFieldInput(${i})"></td>
+                <td><input type="number" id="payment_${i}" readonly oninput="onFieldInput(${i})"></td>
+                <td><input type="number" id="bal_${i}" readonly oninput="onFieldInput(${i})"></td>
+                <td><input type="text" id="amt_${i}" readonly style="font-weight:700; color:#dc2626;"></td>
+            </tr>`;
         }
-    });
-    let header = document.querySelector('.price-header');
-    if (header) header.style.backgroundColor = isPricesUnlocked ? '#fef08a' : '#f1f5f9';
-}
-
-function syncAndCalculate(sourceId) {
-    let el = document.getElementById(sourceId);
-    if (!el) return;
-    let val = el.value;
-    if (sourceId.startsWith('quick_')) {
-        let targetId = sourceId.replace('quick_', '');
-        let targetEl = document.getElementById(targetId);
-        if (targetEl) targetEl.value = val;
-    } else {
-        let quickEl = document.getElementById('quick_' + sourceId);
-        if (quickEl) quickEl.value = val;
     }
-    saveAndCalculate();
+    table.innerHTML = html;
 }
 
-function saveAndCalculate() {
-    inputIds.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) localStorage.setItem('order_' + id, el.value);
-    });
-    calculate();
+function toggleOpenAll() {
+    isAllOpen = !isAllOpen;
+    for (let i = 0; i < TOTAL_ROWS - 1; i++) {
+        ['name', 'dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
+            let el = document.getElementById(`${field}_${i}`);
+            if (el) {
+                if (isAllOpen) el.removeAttribute('readonly');
+                else el.setAttribute('readonly', 'readonly');
+            }
+        });
+    }
 }
 
-function clearQuantities() {
+function clearAllWhenOpened() {
+    if (!isAllOpen) {
+        alert('I-tap muna ang "OPEN ALL" sa taas bago i-clear.');
+        return;
+    }
+    if (confirm('Sigurado ka bang i-clear ang lahat ng rows?')) {
+        for (let i = 0; i < TOTAL_ROWS - 1; i++) {
+            localStorage.removeItem(`ext_row_${i}`);
+            localStorage.removeItem(`ext_saved_${i}`);
+        }
+        loadRowData(activeRowIndex);
+        calculateGrandTotals();
+        clearMainCalculator();
+    }
+}
+
+function selectRow(index) {
+    if (index === TOTAL_ROWS - 1) return;
+    if (activeRowIndex === index) return;
+    
+    // I-save at i-lock ang dati bago lumipat
+    saveRow(activeRowIndex);
+    localStorage.setItem(`ext_saved_${activeRowIndex}`, 'true');
+    
+    activeRowIndex = index;
+    highlightActiveRow();
+    loadRowData(activeRowIndex);
+    
+    // I-clear ang main calculator para blangko paglipat sa bago
+    clearMainCalculator();
+}
+
+function clearMainCalculator() {
     ['qty_dry', 'qty_fresh', 'qty_cab', 'qty_bo', 'payment', 'bal'].forEach(id => {
-        let el = document.getElementById(id);
-        if (el) el.value = '';
-        let quickEl = document.getElementById('quick_' + id);
-        if (quickEl) quickEl.value = '';
         localStorage.removeItem('order_' + id);
+        let el = parent.document.getElementById(id);
+        if (el) el.value = '';
+        let quickEl = parent.document.getElementById('quick_' + id);
+        if (quickEl) quickEl.value = '';
     });
-    calculate();
+    let parentCalc = parent.window.calculate;
+    if (typeof parentCalc === 'function') parentCalc();
 }
 
-function calculate() {
+function highlightActiveRow() {
+    for (let i = 0; i < TOTAL_ROWS; i++) {
+        let tr = document.getElementById(`row_${i}`);
+        if (tr && i !== TOTAL_ROWS - 1) {
+            if (i === activeRowIndex) tr.classList.add('active-row');
+            else tr.classList.remove('active-row');
+        }
+    }
+}
+
+function onFieldInput(index) {
+    calculateRowAmount(index);
+    saveRow(index);
+    calculateGrandTotals();
+}
+
+function calculateRowAmount(index) {
     let getVal = (id) => {
         let el = document.getElementById(id);
         return el && el.value !== '' ? parseFloat(el.value) || 0 : 0;
     };
-    let setVal = (id, val) => {
-        let el = document.getElementById(id);
-        if (el) el.value = (val && val !== 0) ? Math.round(val).toLocaleString() : '';
+    let dry = getVal(`dry_${index}`);
+    let fresh = getVal(`fresh_${index}`);
+    let cab = getVal(`cab_${index}`);
+    let bo = getVal(`bo_${index}`);
+    let payment = getVal(`payment_${index}`);
+    let bal = getVal(`bal_${index}`);
+    
+    let subTotal = (dry * 45) + (fresh * 45) + (cab * 40) - ((bo / 2) * 45);
+    let totalAmt = subTotal - payment + bal;
+    
+    let amtEl = document.getElementById(`amt_${index}`);
+    if (amtEl) amtEl.value = totalAmt !== 0 ? Math.round(totalAmt).toLocaleString() : '';
+}
+
+function saveRow(index) {
+    let data = {
+        name: document.getElementById(`name_${index}`).value,
+        dry: document.getElementById(`dry_${index}`).value,
+        fresh: document.getElementById(`fresh_${index}`).value,
+        cab: document.getElementById(`cab_${index}`).value,
+        bo: document.getElementById(`bo_${index}`).value,
+        payment: document.getElementById(`payment_${index}`).value,
+        bal: document.getElementById(`bal_${index}`).value
     };
+    localStorage.setItem(`ext_row_${index}`, JSON.stringify(data));
+}
 
-    let amtDry = getVal('price_dry') * getVal('qty_dry');
-    let amtFresh = getVal('price_fresh') * getVal('qty_fresh');
-    let amtCab = getVal('price_cab') * getVal('qty_cab');
-    let qtyBo = getVal('qty_bo');
-    let boUnitPrice = getVal('price_bo');
-    let amtBo = (qtyBo / 2) * boUnitPrice;
+function loadRowData(index) {
+    let saved = localStorage.getItem(`ext_row_${index}`);
+    if (saved) {
+        try {
+            let data = JSON.parse(saved);
+            document.getElementById(`name_${index}`).value = data.name || `Client ${index+1}`;
+            document.getElementById(`dry_${index}`).value = data.dry || '';
+            document.getElementById(`fresh_${index}`).value = data.fresh || '';
+            document.getElementById(`cab_${index}`).value = data.cab || '';
+            document.getElementById(`bo_${index}`).value = data.bo || '';
+            document.getElementById(`payment_${index}`).value = data.payment || '';
+            document.getElementById(`bal_${index}`).value = data.bal || '';
+        } catch(e) {}
+    } else {
+        document.getElementById(`name_${index}`).value = `Client ${index+1}`;
+        document.getElementById(`dry_${index}`).value = '';
+        document.getElementById(`fresh_${index}`).value = '';
+        document.getElementById(`cab_${index}`).value = '';
+        document.getElementById(`bo_${index}`).value = '';
+        document.getElementById(`payment_${index}`).value = '';
+        document.getElementById(`bal_${index}`).value = '';
+    }
+    calculateRowAmount(index);
+    highlightActiveRow();
+    calculateGrandTotals();
+}
 
-    setVal('amt_dry', amtDry);
-    setVal('amt_fresh', amtFresh);
-    setVal('amt_cab', amtCab);
-    setVal('amt_bo', amtBo);
+function syncWithMainApp() {
+    let isSaved = localStorage.getItem(`ext_saved_${activeRowIndex}`) === 'true';
+    if (isSaved && !isAllOpen) return; // Kung naka-save at hindi naka-open all, huwag i-sync
 
-    let subTotal = amtFresh + amtDry + amtCab - amtBo;
-    setVal('subtotal', subTotal);
+    let mDry = localStorage.getItem('order_qty_dry') || '';
+    let mFresh = localStorage.getItem('order_qty_fresh') || '';
+    let mCab = localStorage.getItem('order_qty_cab') || '';
+    let mBo = localStorage.getItem('order_qty_bo') || '';
+    let mPayment = localStorage.getItem('order_payment') || '';
+    let mBal = localStorage.getItem('order_bal') || '';
 
-    let payment = getVal('payment');
-    let bal = getVal('bal');
-    let total = subTotal - payment + bal;
-    setVal('total', total);
+    let dEl = document.getElementById(`dry_${activeRowIndex}`);
+    if (dEl && document.activeElement !== dEl) {
+        dEl.value = mDry;
+        document.getElementById(`fresh_${activeRowIndex}`).value = mFresh;
+        document.getElementById(`cab_${activeRowIndex}`).value = mCab;
+        document.getElementById(`bo_${activeRowIndex}`).value = mBo;
+        document.getElementById(`payment_${activeRowIndex}`).value = mPayment;
+        document.getElementById(`bal_${activeRowIndex}`).value = mBal;
+        
+        calculateRowAmount(activeRowIndex);
+        saveRow(activeRowIndex);
+        calculateGrandTotals();
+    }
+}
+
+function calculateGrandTotals() {
+    let tAmt = 0, tDry = 0, tFresh = 0, tCab = 0, tBo = 0, tPayment = 0, tBal = 0;
+    for (let i = 0; i < TOTAL_ROWS - 1; i++) {
+        let getVal = (id) => {
+            let el = document.getElementById(id);
+            return el && el.value !== '' ? parseFloat(el.value.replace(/,/g, '')) || 0 : 0;
+        };
+        tDry += getVal(`dry_${i}`);
+        tFresh += getVal(`fresh_${i}`);
+        tCab += getVal(`cab_${i}`);
+        tBo += getVal(`bo_${i}`);
+        tPayment += getVal(`payment_${i}`);
+        tBal += getVal(`bal_${i}`);
+        tAmt += getVal(`amt_${i}`);
+    }
+    let tIndex = TOTAL_ROWS - 1;
+    let setT = (id, val) => {
+        let el = document.getElementById(`${id}_${tIndex}`);
+        if (el) el.value = val !== 0 ? Math.round(val).toLocaleString() : '';
+    };
+    setT('dry', tDry);
+    setT('fresh', tFresh);
+    setT('cab', tCab);
+    setT('bo', tBo);
+    setT('payment', tPayment);
+    setT('bal', tBal);
+    setT('amt', tAmt);
 }
 </script>
-
 </body>
 </html>
