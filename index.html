@@ -24,9 +24,9 @@ body {
     border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between;
 }
 .right-panel {
-    width: 95px; background: #ffffff; padding: 3px;
+    width: 110px; background: #ffffff; padding: 4px;
     border-radius: 6px; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0; display: flex; flex-direction: column;
+    border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 6px; justify-content: center;
 }
 .bottom-bar { display: flex; gap: 2px; align-items: stretch; width: 100%; }
 .quick-panel {
@@ -75,19 +75,14 @@ input[readonly] { background-color: #f8fafc; color: #475569; font-weight: 500; b
 }
 .mem-btn.m-plus { background-color: #dbeafe; border-color: #bfdbfe; color: #1d4ed8; }
 .mem-btn.mc { background-color: #fee2e2; border-color: #fecaca; color: #dc2626; }
-.history-header {
-    font-size: 9px; font-weight: 700; text-transform: uppercase; color: #475569;
-    padding: 4px 2px; background-color: #f1f5f9; border: 1px solid #e2e8f0; text-align: center;
-    border-top-left-radius: 5px; border-top-right-radius: 5px;
+
+/* Right Panel Action Buttons */
+.side-btn {
+    width: 100%; padding: 10px 4px; border: 1px solid #cbd5e1; border-radius: 4px;
+    font-size: 11px; font-weight: 700; cursor: pointer; text-align: center;
 }
-.history-list {
-    list-style: none; padding: 0; margin: 0; flex: 1; overflow-y: auto;
-    border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; background: #fff;
-}
-.history-item { font-size: 11px; padding: 2px 3px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; color: #1d4ed8; font-weight: 600; }
-.history-input { width: 100%; border: 1px solid transparent; background: transparent; color: #1d4ed8; font-weight: 600; font-size: 11px; text-align: center; padding: 1px; }
-.history-footer { border: 1px solid #bfdbfe; background-color: #eff6ff; padding: 4px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; text-align: center; }
-.history-footer input { background: transparent; border: none; color: #1d4ed8; font-weight: 700; font-size: 10px; padding: 0; }
+.side-btn.open { background-color: #dbeafe; border-color: #bfdbfe; color: #1d4ed8; }
+.side-btn.clear { background-color: #fee2e2; border-color: #fecaca; color: #dc2626; }
 .footer-credit { text-align: center; font-style: italic; font-size: 9px; color: #94a3b8; margin-top: 2px; }
 </style>
 </head>
@@ -157,14 +152,10 @@ input[readonly] { background-color: #f8fafc; color: #475569; font-weight: 500; b
 <div class="footer-credit">created by paulm</div>
 </div>
 
+<!-- Dito inilagay ang OPEN ALL at CLEAR buttons sa kanang banda -->
 <div class="right-panel">
-    <div class="history-header">M+ History</div>
-    <ul id="history-list" class="history-list">
-        <li style="text-align:center; color:#94a3b8; font-size:10px; padding:20px 4px;">No entries</li>
-    </ul>
-    <div class="history-footer">
-        <input type="text" id="history_total" readonly placeholder="0">
-    </div>
+    <button class="side-btn open" id="mainOpenBtn" onclick="triggerExtOpenAll()">📂 OPEN ALL</button>
+    <button class="side-btn clear" onclick="triggerExtClear()">🗑️ CLEAR</button>
 </div>
 </div>
 
@@ -206,77 +197,21 @@ window.onload = function() {
             }
         }
     });
-    let savedHistory = localStorage.getItem('order_history');
-    if (savedHistory !== null) {
-        try { memoryHistory = JSON.parse(savedHistory); } catch(e) { memoryHistory = []; }
-    }
-    recalculateMemoryFromHistory();
     calculate();
 };
 
-let memoryValue = 0; let memoryHistory = [];
-
-function memoryAdd() {
-    let totalFieldVal = document.getElementById('total').value.replace(/,/g, '');
-    let currentTotal = parseFloat(totalFieldVal) || 0;
-    if (currentTotal === 0) return;
-    memoryHistory.push({ amount: currentTotal });
-    saveAndRefreshHistory();
-}
-
-function updateHistoryItem(index, valueStr) {
-    let cleanVal = parseFloat(valueStr.replace(/,/g, '')) || 0;
-    memoryHistory[index].amount = cleanVal;
-    saveAndRefreshHistory();
-}
-
-function saveAndRefreshHistory() {
-    memoryValue = 0;
-    memoryHistory.forEach(item => { memoryValue += item.amount; });
-    localStorage.setItem('order_memory', memoryValue);
-    localStorage.setItem('order_history', JSON.stringify(memoryHistory));
-    updateMemoryDisplay();
-    updateHistoryDisplay();
-}
-
-function recalculateMemoryFromHistory() {
-    memoryValue = 0;
-    memoryHistory.forEach(item => { memoryValue += item.amount; });
-    updateMemoryDisplay();
-    updateHistoryDisplay();
-}
-
-function memoryClear() {
-    memoryValue = 0; memoryHistory = [];
-    localStorage.removeItem('order_memory'); localStorage.removeItem('order_history');
-    updateMemoryDisplay(); updateHistoryDisplay();
-}
-
-function memoryRecall() {
-    document.getElementById('bal').value = memoryValue !== 0 ? memoryValue : '';
-    saveAndCalculate();
-}
-
-function updateMemoryDisplay() {
-    let mDisplay = document.getElementById('m_display');
-    if (mDisplay) { mDisplay.value = memoryValue !== 0 ? Math.round(memoryValue).toLocaleString() : ''; }
-}
-
-function updateHistoryDisplay() {
-    let listEl = document.getElementById('history-list');
-    let totalEl = document.getElementById('history_total');
-    if (!listEl) return;
-    if (memoryHistory.length === 0) {
-        listEl.innerHTML = '<li style="text-align:center; color:#94a3b8; font-size:10px; padding:20px 4px;">No entries</li>';
-        if (totalEl) totalEl.value = '';
-        return;
+function triggerExtOpenAll() {
+    let iframe = document.getElementById('extFrame');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage('toggleOpenAll', '*');
     }
-    let html = '';
-    memoryHistory.forEach((item, index) => {
-        html += `<li class="history-item"><input type="text" class="history-input" value="+${Math.round(item.amount).toLocaleString()}" onchange="updateHistoryItem(${index}, this.value)"></li>`;
-    });
-    listEl.innerHTML = html;
-    if (totalEl) { totalEl.value = Math.round(memoryValue).toLocaleString(); }
+}
+
+function triggerExtClear() {
+    let iframe = document.getElementById('extFrame');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage('clearAllRows', '*');
+    }
 }
 
 function handlePriceHeaderTap() {
@@ -368,42 +303,6 @@ function calculate() {
     setVal('total', total);
 }
 </script>
-<!-- FLOATING OVERLAY EXTENSION TABLE -->
-<div id="extOverlayContainer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:flex-end;">
-    <div style="background:#ffffff; width:100%; max-height:85vh; border-top-left-radius:12px; border-top-right-radius:12px; padding:8px; overflow-y:auto; box-shadow:0 -4px 10px rgba(0,0,0,0.2);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span style="font-weight:700; font-size:12px; color:#1e293b; padding-left:4px;">📋 Client Tracking Sheet</span>
-            <button onclick="toggleExtOverlay()" style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; border-radius:4px; padding:4px 10px; font-weight:700; font-size:11px; cursor:pointer;">✕ CLOSE</button>
-        </div>
-        <!-- Dito natin ilalagay ang table -->
-        <div id="overlayTableContent"></div>
-    </div>
-</div>
 
-<!-- Floating Trigger Button para buksan ang Table -->
-<button onclick="toggleExtOverlay()" style="position:fixed; bottom:15px; right:15px; background:#1d4ed8; color:#ffffff; border:none; border-radius:30px; padding:10px 16px; font-weight:700; font-size:12px; box-shadow:0 4px 6px rgba(0,0,0,0.2); z-index:9998; cursor:pointer;">
-    📊 Table (17)
-</button>
-
-<script>
-function toggleExtOverlay() {
-    let box = document.getElementById('extOverlayContainer');
-    if (box.style.display === 'flex') {
-        box.style.display = 'none';
-    } else {
-        box.style.display = 'flex';
-        loadOverlayTable();
-    }
-}
-
-function loadOverlayTable() {
-    // Dito natin i-rerender ang extension table logic para lumabas sa overlay
-    let container = document.getElementById('overlayTableContent');
-    if (container.innerHTML.trim() !== '') return; // Load once or refresh
-    
-    // Pwede nating i-inject dito ang table HTML at JavaScript logic nanghiwalay o direkta
-    container.innerHTML = `<iframe src="extension.html" style="width:100%; height:400px; border:none; background:transparent;"></iframe>`;
-}
-</script>
 </body>
 </html>
