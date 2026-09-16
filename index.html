@@ -46,18 +46,18 @@ table {
 th,
 td {
     border: 1px solid #e2e8f0;
-    padding: 8px 4px;
+    padding: 8px 3px;
     text-align: center;
     overflow: hidden;
 }
 
 th {
     background-color: #f1f5f9;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     color: #475569;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 th.price-header {
@@ -71,11 +71,11 @@ th.price-header:active {
 
 input {
     width: 100%;
-    padding: 6px 4px;
+    padding: 6px 2px;
     text-align: center;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 13px;
     background-color: #fff;
     transition: all 0.2s;
 }
@@ -100,33 +100,38 @@ input[readonly] {
     border-color: #fecaca;
 }
 
+/* Adjusted Column Widths to fit the new left column */
+.mem-col {
+    width: 15%;
+}
+
 .qty-col {
-    width: 22%;
+    width: 18%;
 }
 
 .price-col {
-    width: 26%;
+    width: 23%;
 }
 
 .label-col {
-    width: 22%;
+    width: 18%;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 12px;
     color: #1e293b;
     background-color: #f8fafc;
 }
 
 .amt-col {
-    width: 30%;
+    width: 26%;
 }
 
 .auto-formula {
     text-align: left;
-    font-size: 11px;
+    font-size: 10px;
     font-style: italic;
     color: #94a3b8;
     background-color: #f8fafc;
-    padding-left: 8px;
+    padding-left: 6px;
 }
 
 .clear-row {
@@ -154,7 +159,7 @@ input[readonly] {
 
 .mem-btn {
     width: 100%;
-    padding: 6px 2px;
+    padding: 6px 1px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     background-color: #e2e8f0;
@@ -242,6 +247,7 @@ input[readonly] {
 <table>
 
 <tr>
+    <th class="mem-col">CMD</th>
     <th class="qty-col">QTY</th>
     <th
         class="price-col price-header"
@@ -255,6 +261,7 @@ input[readonly] {
 </tr>
 
 <tr>
+    <td></td>
     <td>
         <input
             type="number"
@@ -279,6 +286,7 @@ input[readonly] {
 </tr>
 
 <tr>
+    <td></td>
     <td>
         <input
             type="number"
@@ -303,6 +311,7 @@ input[readonly] {
 </tr>
 
 <tr>
+    <td></td>
     <td>
         <input
             type="number"
@@ -327,6 +336,7 @@ input[readonly] {
 </tr>
 
 <tr>
+    <td></td>
     <td>
         <input
             type="number"
@@ -351,14 +361,15 @@ input[readonly] {
 </tr>
 
 <tr>
+    <td></td>
     <td colspan="2" class="auto-formula">
-        Auto: (BO QTY ÷ 2) × BO Unit Price
+        Auto: (BO QTY ÷ 2) × Price
     </td>
     <td colspan="2"></td>
 </tr>
 
 <tr>
-    <td colspan="4" class="clear-row">
+    <td colspan="5" class="clear-row">
         <button
             class="clear-button"
             onclick="clearQuantities()"
@@ -370,9 +381,10 @@ input[readonly] {
 
 <!-- Row 1: Sub Total -->
 <tr>
-    <td colspan="2">
+    <td>
         <button class="mem-btn m-plus" onclick="memoryAdd()" title="Add Total to M+">M+</button>
     </td>
+    <td colspan="2"></td>
     <td class="label-col">Sub Total</td>
     <td>
         <input
@@ -385,9 +397,10 @@ input[readonly] {
 
 <!-- Row 2: Payment -->
 <tr>
-    <td colspan="2">
+    <td>
         <button class="mem-btn mc" onclick="memoryClear()" title="Clear Memory">MC</button>
     </td>
+    <td colspan="2"></td>
     <td class="label-col">Payment</td>
     <td>
         <input
@@ -401,9 +414,10 @@ input[readonly] {
 
 <!-- Row 3: Bal -->
 <tr>
-    <td colspan="2">
+    <td>
         <button class="mem-btn" onclick="memoryRecall()" title="Recall M+ to Balance">MR</button>
     </td>
+    <td colspan="2"></td>
     <td class="label-col">Bal</td>
     <td>
         <input
@@ -415,10 +429,11 @@ input[readonly] {
     </td>
 </tr>
 
-<!-- Row 4: Total & Pure M+ Value Full-Width Display Beside Total -->
+<!-- Row 4: Total & Pure M+ Value Display Beside Total -->
 <tr>
+    <td></td>
     <td colspan="2">
-        <input type="text" id="m_display" value="" readonly style="font-size:13px; font-weight:bold; color:#1d4ed8; background:#eff6ff;">
+        <input type="text" id="m_display" value="" readonly style="font-size:12px; font-weight:bold; color:#1d4ed8; background:#eff6ff;">
     </td>
     <td class="label-col">Total</td>
     <td>
@@ -505,12 +520,8 @@ function memoryAdd() {
 
     memoryValue += currentTotal;
     
-    // Create history item record with timestamp
-    let now = new Date();
-    let timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
+    // Save only the pure amount value into history (no date/time)
     memoryHistory.unshift({
-        time: timeStr,
         amount: currentTotal
     });
 
@@ -559,7 +570,7 @@ function updateHistoryDisplay() {
     memoryHistory.forEach((item, index) => {
         let formattedAmt = item.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         html += `<li class="history-item">
-            <span style="color:#64748b;">#${memoryHistory.length - index} (${item.time})</span>
+            <span style="color:#64748b; font-weight:600;">#${memoryHistory.length - index}</span>
             <span class="amount">+${formattedAmt}</span>
         </li>`;
     });
