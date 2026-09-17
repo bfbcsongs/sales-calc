@@ -49,11 +49,18 @@ tr.total-row input { color: #dc2626; font-weight: 700; }
 
 <script>
 const TOTAL_ROWS = 17;
-let activeRowIndex = parseInt(localStorage.getItem('ext_active_row')) || 0;
+let activeRowIndex = 0;
+try {
+    let savedRow = localStorage.getItem('ext_active_row');
+    if (savedRow !== null && !isNaN(savedRow)) {
+        activeRowIndex = parseInt(savedRow);
+    }
+} catch(e) {
+    activeRowIndex = 0;
+}
 let isNameUnlocked = false;
 let keyTapCount = 0; 
 let keyTimer = null;
-
 window.onload = function() {
     buildTable();
     loadAllRowsData();
