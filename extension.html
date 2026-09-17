@@ -54,7 +54,7 @@ tr.total-row input { color: #dc2626; font-weight: 700; }
 <script>
 let isNameUnlocked = false;
 let keyTapCount = 0; let keyTimer = null;
-let activeRowIndex = 0; 
+let activeRowIndex = parseInt(localStorage.getItem('ext_active_row')) || 0; 
 let lockedRows = {}; 
 const TOTAL_ROWS = 17;
 
@@ -117,7 +117,6 @@ function buildTable() {
 function handleRowClick(index, event) {
     if (index === TOTAL_ROWS - 1) return;
     
-    // Kapag pinindot ang pangalan (name column), i-toggle ang lock state (red / normal)
     let target = event.target;
     if (target.id.startsWith('name_')) {
         toggleRowLock(index);
@@ -210,6 +209,8 @@ function clearAllRowsConfirmed() {
             localStorage.removeItem(`ext_row_${i}`);
             delete lockedRows[i];
         }
+        activeRowIndex = 0;
+        localStorage.setItem('ext_active_row', activeRowIndex);
         loadRowData(activeRowIndex);
         calculateGrandTotals();
         clearMainCalculator();
@@ -224,9 +225,35 @@ function selectRow(index) {
     saveRow(activeRowIndex);
     
     activeRowIndex = index;
+    localStorage.setItem('ext_active_row', activeRowIndex);
+    
     highlightActiveRow();
     loadRowData(activeRowIndex);
-    clearMainCalculator();
+    loadValuesIntoMainCalculator(activeRowIndex);
+}
+
+function loadValuesIntoMainCalculator(index) {
+    let getVal = (field) => {
+        let el = document.getElementById(`${field}_${index}`);
+        return el ? el.value : '';
+    };
+    
+    ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
+        let val = getVal(field);
+        localStorage.setItem('order_qty_' + field, val);
+        if(field === 'payment' || field === 'bal') {
+            localStorage.setItem('order_' + field, val);
+        }
+        
+        let parentEl = parent.document.getElementById(field === 'payment' || field === 'bal' ? field : 'qty_' + field);
+        if (parentEl) parentEl.value = val;
+        
+        let quickEl = parent.document.getElementById('quick_' + (field === 'payment' || field === 'bal' ? field : 'qty_' + field));
+        if (quickEl) quickEl.value = val;
+    });
+
+    let parentCalc = parent.window.calculate;
+    if (typeof parentCalc === 'function') parentCalc();
 }
 
 function clearMainCalculator() {
@@ -336,16 +363,22 @@ function syncWithMainApp() {
 
     let dEl = document.getElementById(`dry_${activeRowIndex}`);
     if (dEl && document.activeElement !== dEl) {
-        dEl.value = mDry;
-        document.getElementById(`fresh_${activeRowIndex}`).value = mFresh;
-        document.getElementById(`cab_${activeRowIndex}`).value = mCab;
-        document.getElementById(`bo_${activeRowIndex}`).value = mBo;
-        document.getElementById(`payment_${activeRowIndex}`).value = mPayment;
-        document.getElementById(`bal_${activeRowIndex}`).value = mBal;
-        
-        calculateRowAmount(activeRowIndex);
-        saveRow(activeRowIndex);
-        calculateGrandTotals();
+        // Tinitiyak natin na ang kasalukuyang active row lang ang binabago ng sync
+        if (dEl.value !== mDry || document.getElementById(`fresh_${activeRowIndex}`).value !== mFresh ||
+            document.getElementById(`cab_${activeRowIndex}`).value !== mCab || document.getElementById(`bo_${activeRowIndex}`).value !== mBo ||
+            document.getElementById(`payment_${activeRowIndex}`).value !== mPayment || document.getElementById(`bal_${activeRowIndex}`).value !== mBal) {
+            
+            dEl.value = mDry;
+            document.getElementById(`fresh_${activeRowIndex}`).value = mFresh;
+            document.getElementById(`cab_${activeRowIndex}`).value = mCab;
+            document.getElementById(`bo_${activeRowIndex}`).value = mBo;
+            document.getElementById(`payment_${activeRowIndex}`).value = mPayment;
+            document.getElementById(`bal_${activeRowIndex}`).value = mBal;
+            
+            calculateRowAmount(activeRowIndex);
+            saveRow(activeRowIndex);
+            calculateGrandTotals();
+        }
     }
 }
 
