@@ -54,13 +54,19 @@ tr.total-row input { color: #dc2626; font-weight: 700; }
 <script>
 let isNameUnlocked = false;
 let keyTapCount = 0; let keyTimer = null;
-let activeRowIndex = parseInt(localStorage.getItem('ext_active_row')) || 0; 
+
+// Kunin ang huling active row mula sa localStorage, o mag-default sa 0 kung wala pa
+let savedActiveRow = localStorage.getItem('ext_active_row');
+let activeRowIndex = savedActiveRow !== null ? parseInt(savedActiveRow) : 0;
+
 let lockedRows = {}; 
 const TOTAL_ROWS = 17;
 
 window.onload = function() {
     buildTable();
     loadRowData(activeRowIndex);
+    highlightActiveRow();
+    
     setInterval(syncWithMainApp, 300);
 
     window.addEventListener('message', function(e) {
@@ -212,6 +218,7 @@ function clearAllRowsConfirmed() {
         activeRowIndex = 0;
         localStorage.setItem('ext_active_row', activeRowIndex);
         loadRowData(activeRowIndex);
+        highlightActiveRow();
         calculateGrandTotals();
         clearMainCalculator();
     }
@@ -305,7 +312,9 @@ function calculateRowAmount(index) {
 }
 
 function saveRow(index) {
-    let nameVal = document.getElementById(`name_${index}`).value.replace('🔒 ', '');
+    let nameInput = document.getElementById(`name_${index}`);
+    if (!nameInput) return;
+    let nameVal = nameInput.value.replace('🔒 ', '');
     let data = {
         name: nameVal,
         dry: document.getElementById(`dry_${index}`).value,
@@ -327,23 +336,22 @@ function loadRowData(index) {
             if (data.locked) lockedRows[index] = true;
             
             let nInput = document.getElementById(`name_${index}`);
-            nInput.value = (lockedRows[index] ? '🔒 ' : '') + (data.name || `Client ${index+1}`);
-            document.getElementById(`dry_${index}`).value = data.dry || '';
-            document.getElementById(`fresh_${index}`).value = data.fresh || '';
-            document.getElementById(`cab_${index}`).value = data.cab || '';
-            document.getElementById(`bo_${index}`).value = data.bo || '';
-            document.getElementById(`payment_${index}`).value = data.payment || '';
-            document.getElementById(`bal_${index}`).value = data.bal || '';
+            if (nInput) nInput.value = (lockedRows[index] ? '🔒 ' : '') + (data.name || `Client ${index+1}`);
+            
+            let setField = (f, val) => {
+                let el = document.getElementById(`${f}_${index}`);
+                if (el) el.value = val || '';
+            };
+            setField('dry', data.dry);
+            setField('fresh', data.fresh);
+            setField('cab', data.cab);
+            setField('bo', data.bo);
+            setField('payment', data.payment);
+            setField('bal', data.bal);
         } catch(e) {}
     } else {
         let nInput = document.getElementById(`name_${index}`);
-        nInput.value = (lockedRows[index] ? '🔒 ' : '') + `Client ${index+1}`;
-        document.getElementById(`dry_${index}`).value = '';
-        document.getElementById(`fresh_${index}`).value = '';
-        document.getElementById(`cab_${index}`).value = '';
-        document.getElementById(`bo_${index}`).value = '';
-        document.getElementById(`payment_${index}`).value = '';
-        document.getElementById(`bal_${index}`).value = '';
+        if (nInput) nInput.value = (lockedRows[index] ? '🔒 ' : '') + `Client ${index+1}`;
     }
     
     updateRowVisuals(index);
@@ -363,17 +371,22 @@ function syncWithMainApp() {
 
     let dEl = document.getElementById(`dry_${activeRowIndex}`);
     if (dEl && document.activeElement !== dEl) {
-        // Tinitiyak natin na ang kasalukuyang active row lang ang binabago ng sync
-        if (dEl.value !== mDry || document.getElementById(`fresh_${activeRowIndex}`).value !== mFresh ||
-            document.getElementById(`cab_${activeRowIndex}`).value !== mCab || document.getElementById(`bo_${activeRowIndex}`).value !== mBo ||
-            document.getElementById(`payment_${activeRowIndex}`).value !== mPayment || document.getElementById(`bal_${activeRowIndex}`).value !== mBal) {
+        let fEl = document.getElementById(`fresh_${activeRowIndex}`);
+        let cEl = document.getElementById(`cab_${activeRowIndex}`);
+        let bEl = document.getElementById(`bo_${activeRowIndex}`);
+        let pEl = document.getElementById(`payment_${activeRowIndex}`);
+        let baEl = document.getElementById(`bal_${activeRowIndex}`);
+
+        if (dEl.value !== mDry || (fEl && fEl.value !== mFresh) || 
+            (cEl && cEl.value !== mCab) || (bEl && bEl.value !== mBo) || 
+            (pEl && pEl.value !== mPayment) || (baEl && baEl.value !== mBal)) {
             
             dEl.value = mDry;
-            document.getElementById(`fresh_${activeRowIndex}`).value = mFresh;
-            document.getElementById(`cab_${activeRowIndex}`).value = mCab;
-            document.getElementById(`bo_${activeRowIndex}`).value = mBo;
-            document.getElementById(`payment_${activeRowIndex}`).value = mPayment;
-            document.getElementById(`bal_${activeRowIndex}`).value = mBal;
+            if (fEl) fEl.value = mFresh;
+            if (cEl) cEl.value = mCab;
+            if (bEl) bEl.value = mBo;
+            if (pEl) pEl.value = mPayment;
+            if (baEl) baEl.value = mBal;
             
             calculateRowAmount(activeRowIndex);
             saveRow(activeRowIndex);
