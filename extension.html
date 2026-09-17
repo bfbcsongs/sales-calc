@@ -24,6 +24,7 @@ body {
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 th, td { border: 1px solid #e2e8f0; padding: 3px 1px; text-align: center; overflow: hidden; height: 26px; }
 th { background-color: #f1f5f9; font-size: 9px; font-weight: 700; color: #475569; text-transform: uppercase; }
+th.key-header { cursor: pointer; user-select: none; font-size: 11px; }
 .col-name { width: 20%; }
 .col-num  { width: 10%; }
 .col-amt  { width: 20%; }
@@ -47,6 +48,8 @@ tr.total-row input { color: #dc2626; font-weight: 700; }
 
 <script>
 let isAllOpen = false;
+let isNameUnlocked = false;
+let keyTapCount = 0; let keyTimer = null;
 let activeRowIndex = 0; 
 const TOTAL_ROWS = 17;
 
@@ -55,7 +58,6 @@ window.onload = function() {
     loadRowData(activeRowIndex);
     setInterval(syncWithMainApp, 300);
 
-    // Pakikinig sa utos galing sa main page buttons (OPEN ALL / CLEAR)
     window.addEventListener('message', function(e) {
         if (e.data === 'toggleOpenAll') {
             toggleOpenAll();
@@ -68,7 +70,7 @@ window.onload = function() {
 function buildTable() {
     let table = document.getElementById('extTable');
     let html = `<tr>
-        <th class="col-name">Name</th>
+        <th class="col-name key-header" onclick="handleKeyTap()" title="3 taps to unlock names">🔑 NAME</th>
         <th class="col-num">Dry</th>
         <th class="col-num">Fresh</th>
         <th class="col-num">Cab</th>
@@ -107,10 +109,36 @@ function buildTable() {
     table.innerHTML = html;
 }
 
+function handleKeyTap() {
+    keyTapCount++;
+    clearTimeout(keyTimer);
+    if (keyTapCount >= 3) {
+        toggleNameLock();
+        keyTapCount = 0;
+    } else {
+        keyTimer = setTimeout(() => { keyTapCount = 0; }, 600);
+    }
+}
+
+function toggleNameLock() {
+    isNameUnlocked = !isNameUnlocked;
+    for (let i = 0; i < TOTAL_ROWS - 1; i++) {
+        let input = document.getElementById(`name_${i}`);
+        if (input) {
+            if (isNameUnlocked) input.removeAttribute('readonly');
+            else input.setAttribute('readonly', 'readonly');
+        }
+    }
+    let header = document.querySelector('.key-header');
+    if (header) header.style.backgroundColor = isNameUnlocked ? '#fef08a' : '#f1f5f9';
+}
+
 function toggleOpenAll() {
     isAllOpen = !isAllOpen;
     for (let i = 0; i < TOTAL_ROWS - 1; i++) {
-        ['name', 'dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
+        if (i === activeRowIndex) continue; // Unfinished/Active row ay hindi kailanman mamo-lock
+        
+        ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
             let el = document.getElementById(`${field}_${i}`);
             if (el) {
                 if (isAllOpen) el.removeAttribute('readonly');
@@ -122,13 +150,12 @@ function toggleOpenAll() {
 
 function clearAllWhenOpened() {
     if (!isAllOpen) {
-        alert('I-tap muna ang "OPEN ALL" sa taas bago i-clear.');
+        alert('I-tap muna ang "OPEN" sa kanan bago i-clear ang mga rows.');
         return;
     }
     if (confirm('Sigurado ka bang i-clear ang lahat ng rows?')) {
         for (let i = 0; i < TOTAL_ROWS - 1; i++) {
             localStorage.removeItem(`ext_row_${i}`);
-            localStorage.removeItem(`ext_saved_${i}`);
         }
         loadRowData(activeRowIndex);
         calculateGrandTotals();
@@ -140,16 +167,24 @@ function selectRow(index) {
     if (index === TOTAL_ROWS - 1) return;
     if (activeRowIndex === index) return;
     
-    // I-save at i-lock ang dati bago lumipat
+    // 1. I-save at i-lock ang dating row pag-alis
     saveRow(activeRowIndex);
-    localStorage.setItem(`ext_saved_${activeRowIndex}`, 'true');
+    lockFinishedRow(activeRowIndex);
     
+    // 2. Lumipat sa bagong row
     activeRowIndex = index;
     highlightActiveRow();
     loadRowData(activeRowIndex);
     
-    // I-clear ang main calculator para blangko paglipat sa bago
+    // 3. I-clear ang main calculator para blangko sa bago
     clearMainCalculator();
+}
+
+function lockFinishedRow(index) {
+    ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
+        let el = document.getElementById(`${field}_${index}`);
+        if (el) el.setAttribute('readonly', 'readonly');
+    });
 }
 
 function clearMainCalculator() {
@@ -234,15 +269,19 @@ function loadRowData(index) {
         document.getElementById(`payment_${index}`).value = '';
         document.getElementById(`bal_${index}`).value = '';
     }
+    
+    // Siguraduhing laging naka-open/editable ang active row
+    ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
+        let el = document.getElementById(`${field}_${index}`);
+        if (el) el.removeAttribute('readonly');
+    });
+
     calculateRowAmount(index);
     highlightActiveRow();
     calculateGrandTotals();
 }
 
 function syncWithMainApp() {
-    let isSaved = localStorage.getItem(`ext_saved_${activeRowIndex}`) === 'true';
-    if (isSaved && !isAllOpen) return; // Kung naka-save at hindi naka-open all, huwag i-sync
-
     let mDry = localStorage.getItem('order_qty_dry') || '';
     let mFresh = localStorage.getItem('order_qty_fresh') || '';
     let mCab = localStorage.getItem('order_qty_cab') || '';
