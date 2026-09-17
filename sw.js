@@ -1,7 +1,24 @@
-const CACHE_NAME = 'sales-calc-v2'; // <--- Palitan ang version number dito (e.g. v1 to v2)
+const CACHE_NAME = 'sales-calc-v3';
+
+// Mga files na kailangang i-save para gumana offline
+const urlsToCache = [
+    './',
+    './index.html',
+    './extension.html',
+    './manifest.json',
+    './icon-192.png',
+    './icon-512.png'
+];
 
 self.addEventListener('install', (event) => {
-    self.skipWaiting(); // Agad na gagamitin ang bagong bersyon
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then((cache) => {
+                console.log('Opened cache');
+                return cache.addAll(urlsToCache);
+            })
+    );
+    self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -10,10 +27,22 @@ self.addEventListener('activate', (event) => {
             return Promise.all(
                 cacheNames.map((cache) => {
                     if (cache !== CACHE_NAME) {
-                        return caches.delete(cache); // Binubura ang lumang cache
+                        console.log('Deleting old cache:', cache);
+                        return caches.delete(cache);
                     }
                 })
             );
         })
+    );
+    self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request)
+            .then((response) => {
+                // Kung nasa cache, ibigay agad; kung wala, kunin sa network
+                return response || fetch(event.request);
+            })
     );
 });
