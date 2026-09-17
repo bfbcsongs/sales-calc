@@ -37,10 +37,6 @@ input[readonly] { background-color: transparent; color: #334155; }
 tr.active-row td { background-color: #eff6ff !important; border-color: #bfdbfe; }
 tr.active-row input { color: #1d4ed8; font-weight: 600; }
 
-/* Kulay red kapag naka-lock ang row */
-tr.locked-row td { background-color: #fef2f2 !important; border-color: #fecaca !important; }
-tr.locked-row input { color: #dc2626 !important; font-weight: 600; }
-
 tr.total-row td { background-color: #fef2f2 !important; font-weight: 700; color: #dc2626; }
 tr.total-row input { color: #dc2626; font-weight: 700; }
 </style>
@@ -52,36 +48,25 @@ tr.total-row input { color: #dc2626; font-weight: 700; }
 </div>
 
 <script>
-let isNameUnlocked = false;
-let keyTapCount = 0; let keyTimer = null;
-
-// Kunin ang huling active row mula sa localStorage, o mag-default sa 0 kung wala pa
-let savedActiveRow = localStorage.getItem('ext_active_row');
-let activeRowIndex = savedActiveRow !== null ? parseInt(savedActiveRow) : 0;
-
-let lockedRows = {}; 
 const TOTAL_ROWS = 17;
+let activeRowIndex = parseInt(localStorage.getItem('ext_active_row')) || 0;
+let isNameUnlocked = false;
+let keyTapCount = 0; 
+let keyTimer = null;
 
 window.onload = function() {
     buildTable();
-    loadRowData(activeRowIndex);
-    highlightActiveRow();
-    
-    setInterval(syncWithMainApp, 300);
+    loadAllRowsData();
+    selectRow(activeRowIndex, false);
 
-    window.addEventListener('message', function(e) {
-        if (e.data === 'toggleOpenAll') {
-            toggleAllRowsLock();
-        } else if (e.data === 'clearAllRows') {
-            clearAllRowsConfirmed();
-        }
-    });
+    // Live sync sa active row (Per Row Sync)
+    setInterval(syncActiveRowData, 200);
 };
 
 function buildTable() {
     let table = document.getElementById('extTable');
     let html = `<tr>
-        <th class="col-name key-header" onclick="handleKeyTap()" title="3 taps to unlock names">🔑 NAME</th>
+        <th class="col-name key-header" onclick="handleKeyTap()" title="5 taps to unlock names">🔑 NAME</th>
         <th class="col-num">Dry</th>
         <th class="col-num">Fresh</th>
         <th class="col-num">Cab</th>
@@ -105,14 +90,14 @@ function buildTable() {
                 <td><input type="text" id="amt_${i}" readonly style="font-weight:700; color:#dc2626;"></td>
             </tr>`;
         } else {
-            html += `<tr id="row_${i}" onclick="handleRowClick(${i}, event)">
-                <td><input type="text" id="name_${i}" value="Client ${i+1}" readonly oninput="saveRow(${i})"></td>
-                <td><input type="number" id="dry_${i}" readonly oninput="onFieldInput(${i})"></td>
-                <td><input type="number" id="fresh_${i}" readonly oninput="onFieldInput(${i})"></td>
-                <td><input type="number" id="cab_${i}" readonly oninput="onFieldInput(${i})"></td>
-                <td><input type="number" id="bo_${i}" readonly oninput="onFieldInput(${i})"></td>
-                <td><input type="number" id="payment_${i}" readonly oninput="onFieldInput(${i})"></td>
-                <td><input type="number" id="bal_${i}" readonly oninput="onFieldInput(${i})"></td>
+            html += `<tr id="row_${i}" onclick="selectRow(${i}, true)">
+                <td><input type="text" id="name_${i}" value="Client ${i+1}" ${isNameUnlocked ? '' : 'readonly'} oninput="saveRow(${i})"></td>
+                <td><input type="number" id="dry_${i}" readonly></td>
+                <td><input type="number" id="fresh_${i}" readonly></td>
+                <td><input type="number" id="cab_${i}" readonly></td>
+                <td><input type="number" id="bo_${i}" readonly></td>
+                <td><input type="number" id="payment_${i}" readonly></td>
+                <td><input type="number" id="bal_${i}" readonly></td>
                 <td><input type="text" id="amt_${i}" readonly style="font-weight:700; color:#dc2626;"></td>
             </tr>`;
         }
@@ -120,65 +105,10 @@ function buildTable() {
     table.innerHTML = html;
 }
 
-function handleRowClick(index, event) {
-    if (index === TOTAL_ROWS - 1) return;
-    
-    let target = event.target;
-    if (target.id.startsWith('name_')) {
-        toggleRowLock(index);
-    } else {
-        selectRow(index);
-    }
-}
-
-function toggleRowLock(index) {
-    if (lockedRows[index]) {
-        delete lockedRows[index];
-    } else {
-        lockedRows[index] = true;
-        saveRow(index);
-    }
-    updateRowVisuals(index);
-    calculateGrandTotals();
-}
-
-function updateRowVisuals(index) {
-    let tr = document.getElementById(`row_${index}`);
-    if (!tr) return;
-    
-    let isLocked = lockedRows[index];
-    let nameInput = document.getElementById(`name_${index}`);
-    
-    if (isLocked) {
-        tr.classList.add('locked-row');
-        tr.classList.remove('active-row');
-        ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
-            let el = document.getElementById(`${field}_${index}`);
-            if (el) el.setAttribute('readonly', 'readonly');
-        });
-        if (nameInput) {
-            let cleanName = nameInput.value.replace('🔒 ', '');
-            nameInput.value = '🔒 ' + cleanName;
-        }
-    } else {
-        tr.classList.remove('locked-row');
-        if (nameInput) {
-            nameInput.value = nameInput.value.replace('🔒 ', '');
-        }
-        if (index === activeRowIndex) {
-            tr.classList.add('active-row');
-            ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
-                let el = document.getElementById(`${field}_${index}`);
-                if (el) el.removeAttribute('readonly');
-            });
-        }
-    }
-}
-
 function handleKeyTap() {
     keyTapCount++;
     clearTimeout(keyTimer);
-    if (keyTapCount >= 3) {
+    if (keyTapCount >= 5) { // 5 taps para mag-unlock ang names
         toggleNameLock();
         keyTapCount = 0;
     } else {
@@ -190,7 +120,7 @@ function toggleNameLock() {
     isNameUnlocked = !isNameUnlocked;
     for (let i = 0; i < TOTAL_ROWS - 1; i++) {
         let input = document.getElementById(`name_${i}`);
-        if (input && !lockedRows[i]) {
+        if (input) {
             if (isNameUnlocked) input.removeAttribute('readonly');
             else input.setAttribute('readonly', 'readonly');
         }
@@ -199,44 +129,30 @@ function toggleNameLock() {
     if (header) header.style.backgroundColor = isNameUnlocked ? '#fef08a' : '#f1f5f9';
 }
 
-function toggleAllRowsLock() {
-    let anyLocked = Object.keys(lockedRows).length > 0;
-    for (let i = 0; i < TOTAL_ROWS - 1; i++) {
-        if (!anyLocked) lockedRows[i] = true;
-        else delete lockedRows[i];
-        updateRowVisuals(i);
-    }
-    calculateGrandTotals();
-}
-
-function clearAllRowsConfirmed() {
-    if (confirm('Sigurado ka bang i-clear ang lahat ng rows?')) {
-        for (let i = 0; i < TOTAL_ROWS - 1; i++) {
-            localStorage.removeItem(`ext_row_${i}`);
-            delete lockedRows[i];
-        }
-        activeRowIndex = 0;
-        localStorage.setItem('ext_active_row', activeRowIndex);
-        loadRowData(activeRowIndex);
-        highlightActiveRow();
-        calculateGrandTotals();
-        clearMainCalculator();
-    }
-}
-
-function selectRow(index) {
+function selectRow(index, loadToMain = true) {
     if (index === TOTAL_ROWS - 1) return;
-    if (lockedRows[index]) return; // Kung naka-lock, bawal galawin
-    if (activeRowIndex === index) return;
     
+    // Save muna ang data ng dating active row bago lumipat
     saveRow(activeRowIndex);
     
     activeRowIndex = index;
     localStorage.setItem('ext_active_row', activeRowIndex);
     
     highlightActiveRow();
-    loadRowData(activeRowIndex);
-    loadValuesIntoMainCalculator(activeRowIndex);
+    
+    if (loadToMain) {
+        loadValuesIntoMainCalculator(activeRowIndex);
+    }
+}
+
+function highlightActiveRow() {
+    for (let i = 0; i < TOTAL_ROWS - 1; i++) {
+        let tr = document.getElementById(`row_${i}`);
+        if (tr) {
+            if (i === activeRowIndex) tr.classList.add('active-row');
+            else tr.classList.remove('active-row');
+        }
+    }
 }
 
 function loadValuesIntoMainCalculator(index) {
@@ -245,17 +161,18 @@ function loadValuesIntoMainCalculator(index) {
         return el ? el.value : '';
     };
     
-    ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
+    // I-load ang values ng piniling row papunta sa main table / local storage ng main app
+    let mFields = ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'];
+    mFields.forEach(field => {
         let val = getVal(field);
-        localStorage.setItem('order_qty_' + field, val);
-        if(field === 'payment' || field === 'bal') {
-            localStorage.setItem('order_' + field, val);
-        }
+        let storageKey = (field === 'payment' || field === 'bal') ? 'order_' + field : 'order_qty_' + field;
+        localStorage.setItem(storageKey, val);
         
-        let parentEl = parent.document.getElementById(field === 'payment' || field === 'bal' ? field : 'qty_' + field);
+        let parentElId = (field === 'payment' || field === 'bal') ? field : 'qty_' + field;
+        let parentEl = parent.document.getElementById(parentElId);
         if (parentEl) parentEl.value = val;
         
-        let quickEl = parent.document.getElementById('quick_' + (field === 'payment' || field === 'bal' ? field : 'qty_' + field));
+        let quickEl = parent.document.getElementById('quick_' + parentElId);
         if (quickEl) quickEl.value = val;
     });
 
@@ -263,105 +180,46 @@ function loadValuesIntoMainCalculator(index) {
     if (typeof parentCalc === 'function') parentCalc();
 }
 
-function clearMainCalculator() {
-    ['qty_dry', 'qty_fresh', 'qty_cab', 'qty_bo', 'payment', 'bal'].forEach(id => {
-        localStorage.removeItem('order_' + id);
-        let el = parent.document.getElementById(id);
-        if (el) el.value = '';
-        let quickEl = parent.document.getElementById('quick_' + id);
-        if (quickEl) quickEl.value = '';
-    });
-    let parentCalc = parent.window.calculate;
-    if (typeof parentCalc === 'function') parentCalc();
-}
-
-function highlightActiveRow() {
-    for (let i = 0; i < TOTAL_ROWS; i++) {
-        let tr = document.getElementById(`row_${i}`);
-        if (tr && i !== TOTAL_ROWS - 1) {
-            if (i === activeRowIndex && !lockedRows[i]) tr.classList.add('active-row');
-            else if (!lockedRows[i]) tr.classList.remove('active-row');
-        }
-    }
-}
-
-function onFieldInput(index) {
-    if (lockedRows[index]) return;
-    calculateRowAmount(index);
-    saveRow(index);
-    calculateGrandTotals();
-}
-
-function calculateRowAmount(index) {
-    let getVal = (id) => {
-        let el = document.getElementById(id);
-        return el && el.value !== '' ? parseFloat(el.value) || 0 : 0;
-    };
-    let dry = getVal(`dry_${index}`);
-    let fresh = getVal(`fresh_${index}`);
-    let cab = getVal(`cab_${index}`);
-    let bo = getVal(`bo_${index}`);
-    let payment = getVal(`payment_${index}`);
-    let bal = getVal(`bal_${index}`);
-    
-    let subTotal = (dry * 45) + (fresh * 45) + (cab * 40) - ((bo / 2) * 45);
-    let totalAmt = subTotal - payment + bal;
-    
-    let amtEl = document.getElementById(`amt_${index}`);
-    if (amtEl) amtEl.value = totalAmt !== 0 ? Math.round(totalAmt).toLocaleString() : '';
-}
-
 function saveRow(index) {
+    if (index < 0 || index >= TOTAL_ROWS - 1) return;
     let nameInput = document.getElementById(`name_${index}`);
     if (!nameInput) return;
-    let nameVal = nameInput.value.replace('🔒 ', '');
+    
     let data = {
-        name: nameVal,
+        name: nameInput.value,
         dry: document.getElementById(`dry_${index}`).value,
         fresh: document.getElementById(`fresh_${index}`).value,
         cab: document.getElementById(`cab_${index}`).value,
         bo: document.getElementById(`bo_${index}`).value,
         payment: document.getElementById(`payment_${index}`).value,
-        bal: document.getElementById(`bal_${index}`).value,
-        locked: !!lockedRows[index]
+        bal: document.getElementById(`bal_${index}`).value
     };
     localStorage.setItem(`ext_row_${index}`, JSON.stringify(data));
 }
 
-function loadRowData(index) {
-    let saved = localStorage.getItem(`ext_row_${index}`);
-    if (saved) {
-        try {
-            let data = JSON.parse(saved);
-            if (data.locked) lockedRows[index] = true;
-            
-            let nInput = document.getElementById(`name_${index}`);
-            if (nInput) nInput.value = (lockedRows[index] ? '🔒 ' : '') + (data.name || `Client ${index+1}`);
-            
-            let setField = (f, val) => {
-                let el = document.getElementById(`${f}_${index}`);
-                if (el) el.value = val || '';
-            };
-            setField('dry', data.dry);
-            setField('fresh', data.fresh);
-            setField('cab', data.cab);
-            setField('bo', data.bo);
-            setField('payment', data.payment);
-            setField('bal', data.bal);
-        } catch(e) {}
-    } else {
-        let nInput = document.getElementById(`name_${index}`);
-        if (nInput) nInput.value = (lockedRows[index] ? '🔒 ' : '') + `Client ${index+1}`;
+function loadAllRowsData() {
+    for (let i = 0; i < TOTAL_ROWS - 1; i++) {
+        let saved = localStorage.getItem(`ext_row_${i}`);
+        if (saved) {
+            try {
+                let data = JSON.parse(saved);
+                let nInput = document.getElementById(`name_${i}`);
+                if (nInput) nInput.value = data.name || `Client ${i+1}`;
+                
+                document.getElementById(`dry_${i}`).value = data.dry || '';
+                document.getElementById(`fresh_${i}`).value = data.fresh || '';
+                document.getElementById(`cab_${i}`).value = data.cab || '';
+                document.getElementById(`bo_${i}`).value = data.bo || '';
+                document.getElementById(`payment_${i}`).value = data.payment || '';
+                document.getElementById(`bal_${i}`).value = data.bal || '';
+            } catch(e) {}
+        }
     }
-    
-    updateRowVisuals(index);
-    calculateRowAmount(index);
     calculateGrandTotals();
 }
 
-function syncWithMainApp() {
-    if (lockedRows[activeRowIndex]) return;
-
+function syncActiveRowData() {
+    // Kunin ang current values mula sa main table storage
     let mDry = localStorage.getItem('order_qty_dry') || '';
     let mFresh = localStorage.getItem('order_qty_fresh') || '';
     let mCab = localStorage.getItem('order_qty_cab') || '';
@@ -369,30 +227,42 @@ function syncWithMainApp() {
     let mPayment = localStorage.getItem('order_payment') || '';
     let mBal = localStorage.getItem('order_bal') || '';
 
-    let dEl = document.getElementById(`dry_${activeRowIndex}`);
-    if (dEl && document.activeElement !== dEl) {
-        let fEl = document.getElementById(`fresh_${activeRowIndex}`);
-        let cEl = document.getElementById(`cab_${activeRowIndex}`);
-        let bEl = document.getElementById(`bo_${activeRowIndex}`);
-        let pEl = document.getElementById(`payment_${activeRowIndex}`);
-        let baEl = document.getElementById(`bal_${activeRowIndex}`);
-
-        if (dEl.value !== mDry || (fEl && fEl.value !== mFresh) || 
-            (cEl && cEl.value !== mCab) || (bEl && bEl.value !== mBo) || 
-            (pEl && pEl.value !== mPayment) || (baEl && baEl.value !== mBal)) {
-            
-            dEl.value = mDry;
-            if (fEl) fEl.value = mFresh;
-            if (cEl) cEl.value = mCab;
-            if (bEl) bEl.value = mBo;
-            if (pEl) pEl.value = mPayment;
-            if (baEl) baEl.value = mBal;
-            
-            calculateRowAmount(activeRowIndex);
-            saveRow(activeRowIndex);
-            calculateGrandTotals();
+    // Ilagay sa active row ng extension table nang per-row
+    let setVal = (field, val) => {
+        let el = document.getElementById(`${field}_${activeRowIndex}`);
+        if (el && el.value !== val) {
+            el.value = val;
         }
+    };
+
+    setVal('dry', mDry);
+    setVal('fresh', mFresh);
+    setVal('cab', mCab);
+    setVal('bo', mBo);
+    setVal('payment', mPayment);
+    setVal('bal', mBal);
+
+    // Kalkulahin ang Amount ng row na ito base sa Total ng main table o computation
+    let mainTotalEl = parent.document.getElementById('total_amount') || parent.document.getElementById('grand_total') || parent.document.getElementById('total');
+    
+    // Kunin ang subtotal/amount computation para sa active row
+    let dryNum = parseFloat(mDry) || 0;
+    let freshNum = parseFloat(mFresh) || 0;
+    let cabNum = parseFloat(mCab) || 0;
+    let boNum = parseFloat(mBo) || 0;
+    let payNum = parseFloat(mPayment) || 0;
+    let balNum = parseFloat(mBal) || 0;
+
+    let subTotal = (dryNum * 45) + (freshNum * 45) + (cabNum * 40) - ((boNum / 2) * 45);
+    let totalAmt = subTotal - payNum + balNum;
+
+    let amtEl = document.getElementById(`amt_${activeRowIndex}`);
+    if (amtEl) {
+        amtEl.value = totalAmt !== 0 ? Math.round(totalAmt).toLocaleString() : '';
     }
+
+    saveRow(activeRowIndex);
+    calculateGrandTotals();
 }
 
 function calculateGrandTotals() {
@@ -400,7 +270,7 @@ function calculateGrandTotals() {
     for (let i = 0; i < TOTAL_ROWS - 1; i++) {
         let getVal = (id) => {
             let el = document.getElementById(id);
-            return el && el.value !== '' ? parseFloat(el.value.replace(/,/g, '').replace('🔒 ', '')) || 0 : 0;
+            return el && el.value !== '' ? parseFloat(el.value.replace(/,/g, '')) || 0 : 0;
         };
         tDry += getVal(`dry_${i}`);
         tFresh += getVal(`fresh_${i}`);
@@ -408,8 +278,13 @@ function calculateGrandTotals() {
         tBo += getVal(`bo_${i}`);
         tPayment += getVal(`payment_${i}`);
         tBal += getVal(`bal_${i}`);
-        tAmt += getVal(`amt_${i}`);
+        
+        let amtEl = document.getElementById(`amt_${i}`);
+        if (amtEl && amtEl.value !== '') {
+            tAmt += parseFloat(amtEl.value.replace(/,/g, '')) || 0;
+        }
     }
+    
     let tIndex = TOTAL_ROWS - 1;
     let setT = (id, val) => {
         let el = document.getElementById(`${id}_${tIndex}`);
