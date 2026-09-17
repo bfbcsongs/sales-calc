@@ -186,19 +186,36 @@ let tapCount = 0; let tapTimer = null; let isPricesUnlocked = false;
 const inputIds = ['qty_dry', 'price_dry', 'qty_fresh', 'price_fresh', 'qty_cab', 'price_cab', 'qty_bo', 'price_bo', 'payment', 'bal'];
 
 window.onload = function() {
-    inputIds.forEach(id => {
-        let savedVal = localStorage.getItem('order_' + id);
-        if (savedVal !== null) {
-            let el = document.getElementById(id);
-            if(el) el.value = savedVal;
-            if (id.startsWith('qty_')) {
-                let quickEl = document.getElementById('quick_' + id);
-                if (quickEl) quickEl.value = savedVal;
+window.onload = function() {
+    try {
+        inputIds.forEach(id => {
+            let savedVal = localStorage.getItem('order_' + id);
+            if (savedVal !== null) {
+                let el = document.getElementById(id);
+                if(el) el.value = savedVal;
+                if (id.startsWith('qty_')) {
+                    let quickEl = document.getElementById('quick_' + id);
+                    if (quickEl) quickEl.value = savedVal;
+                }
             }
-        }
-    });
+        });
+    } catch(e) {
+        console.warn('LocalStorage error on load:', e);
+    }
     calculate();
 };
+
+function saveAndCalculate() {
+    try {
+        inputIds.forEach(id => {
+            let el = document.getElementById(id);
+            if (el) localStorage.setItem('order_' + id, el.value);
+        });
+    } catch(e) {
+        console.warn('LocalStorage error on save:', e);
+    }
+    calculate();
+}
 
 function triggerExtOpenAll() {
     let iframe = document.getElementById('extFrame');
