@@ -136,7 +136,7 @@ function toggleNameLock() {
 function toggleOpenAll() {
     isAllOpen = !isAllOpen;
     for (let i = 0; i < TOTAL_ROWS - 1; i++) {
-        if (i === activeRowIndex) continue; // Unfinished/Active row ay hindi kailanman mamo-lock
+        if (i === activeRowIndex) continue; // Active row laging bukas
         
         ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
             let el = document.getElementById(`${field}_${i}`);
@@ -167,7 +167,7 @@ function selectRow(index) {
     if (index === TOTAL_ROWS - 1) return;
     if (activeRowIndex === index) return;
     
-    // 1. I-save at i-lock ang dating row pag-alis
+    // 1. I-save at i-lock ang lumang row bago umalis
     saveRow(activeRowIndex);
     lockFinishedRow(activeRowIndex);
     
@@ -270,7 +270,7 @@ function loadRowData(index) {
         document.getElementById(`bal_${index}`).value = '';
     }
     
-    // Siguraduhing laging naka-open/editable ang active row
+    // LAGING BUKSAN (alisin ang readonly) ang mga fields ng active/current row para ma-edit at mag-sync agad
     ['dry', 'fresh', 'cab', 'bo', 'payment', 'bal'].forEach(field => {
         let el = document.getElementById(`${field}_${index}`);
         if (el) el.removeAttribute('readonly');
