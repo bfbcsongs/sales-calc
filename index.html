@@ -152,7 +152,6 @@ input[readonly] { background-color: #f8fafc; color: #475569; font-weight: 500; b
 <div class="footer-credit">created by paulm</div>
 </div>
 
-<!-- Dito inilagay ang OPEN ALL at CLEAR buttons sa kanang banda -->
 <div class="right-panel">
     <button class="side-btn open" id="mainOpenBtn" onclick="triggerExtOpenAll()">📂 OPEN ALL</button>
     <button class="side-btn clear" onclick="triggerExtClear()">🗑️ CLEAR</button>
@@ -176,7 +175,6 @@ input[readonly] { background-color: #f8fafc; color: #475569; font-weight: 500; b
     </div>
 </div>
 
-<!-- Extension Table Frame sa Ibaba -->
 <iframe src="extension.html" style="width:100%; height:500px; border:none; border-radius:6px; margin-top:4px; background:transparent;" id="extFrame"></iframe>
 
 </div>
@@ -186,20 +184,19 @@ let tapCount = 0; let tapTimer = null; let isPricesUnlocked = false;
 const inputIds = ['qty_dry', 'price_dry', 'qty_fresh', 'price_fresh', 'qty_cab', 'price_cab', 'qty_bo', 'price_bo', 'payment', 'bal'];
 
 window.onload = function() {
-window.onload = function() {
     try {
         inputIds.forEach(id => {
             let savedVal = localStorage.getItem('order_' + id);
             if (savedVal !== null) {
                 let el = document.getElementById(id);
-                if(el) el.value = savedVal;
+                if (el) el.value = savedVal;
                 if (id.startsWith('qty_')) {
                     let quickEl = document.getElementById('quick_' + id);
                     if (quickEl) quickEl.value = savedVal;
                 }
             }
         });
-    } catch(e) {
+    } catch (e) {
         console.warn('LocalStorage error on load:', e);
     }
     calculate();
@@ -211,7 +208,7 @@ function saveAndCalculate() {
             let el = document.getElementById(id);
             if (el) localStorage.setItem('order_' + id, el.value);
         });
-    } catch(e) {
+    } catch (e) {
         console.warn('LocalStorage error on save:', e);
     }
     calculate();
@@ -270,14 +267,6 @@ function syncAndCalculate(sourceId) {
     saveAndCalculate();
 }
 
-function saveAndCalculate() {
-    inputIds.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) localStorage.setItem('order_' + id, el.value);
-    });
-    calculate();
-}
-
 function clearQuantities() {
     ['qty_dry', 'qty_fresh', 'qty_cab', 'qty_bo', 'payment', 'bal'].forEach(id => {
         let el = document.getElementById(id);
@@ -319,16 +308,18 @@ function calculate() {
     let total = subTotal - payment + bal;
     setVal('total', total);
 }
-    if ('serviceWorker' in navigator) {
+
+if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js')
             .then(function(registration) {
-                console.log('Service worker registered: ', registration.scope);
-            }, function(err) {
-                console.log('Service worker registration failed: ', err);
+                console.log('Service worker registered:', registration.scope);
+            })
+            .catch(function(error) {
+                console.error('Service worker registration failed:', error);
             });
     });
-    }
+}
 </script>
 
 </body>
