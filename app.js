@@ -84,6 +84,15 @@ function resetInactivityTimer() {
     document.addEventListener(evt, resetInactivityTimer, true);
 });
 
+function autoSaveAndReset() {
+    if (currentSessionDate && currentSessionName) {
+        saveLedger();
+        forceSaveCurrentDay();
+    }
+    setEncodingEditable(false);
+    showOpenModal();
+}
+
 function setEncodingEditable(editable) {
     isEditingActive = editable;
     const inputs = document.querySelectorAll('.main-wrapper input:not(.price-input):not(#modalDateInput):not(#modalNameInput)');
@@ -104,6 +113,10 @@ function showOpenModal() {
     document.getElementById("setupModal").style.display = "flex";
 }
 
+function closeSetupModal() {
+    document.getElementById("setupModal").style.display = "none";
+}
+
 function openSaveConfirmationModal() {
     if (!currentSessionDate || !currentSessionName) {
         alert("No active session to save. Please start a session first.");
@@ -116,6 +129,204 @@ function openSaveConfirmationModal() {
     document.getElementById("modalDateInput").value = currentSessionDate;
     document.getElementById("modalNameInput").value = currentSessionName;
     document.getElementById("setupModal").style.display = "flex";
+}
+
+function handleModalSubmit() {
+    const dateVal = document.getElementById("modalDateInput").value;
+    const nameVal = document.getElementById("modalNameInput").value.trim();
+
+    if (!dateVal || !nameVal) {
+        alert("Please select both Date and Route / Salesman Name.");
+        return;
+    }
+
+    if (modalMode === "OPEN") {
+        currentSessionDate = dateVal;
+        currentSessionName = nameVal;
+        document.getElementById("displayFileDate").textContent = "Date: " + currentSessionDate;
+        document.getElementById("displayFileName").textContent = currentSessionName;
+
+        document.getElementById("setupModal").style.display = "none";
+        setEncodingEditable(true);
+        loadRowToMain(1);
+        saveLedger();
+        resetInactivityTimer();
+    } else if (modalMode === "SAVE") {
+        currentSessionDate = dateVal;
+        currentSessionName = nameVal;
+        document.getElementById("displayFileDate").textContent = "Date: " + currentSessionDate;
+        document.getElementById("displayFileName").textContent = currentSessionName;
+
+        forceSaveCurrentDay();
+        document.getElementById("setupModal").style.display = "none";
+        alert("File successfully saved to 30-Day History!");
+    }
+}
+
+function promptNewFile() {
+    if (confirm("Start a new day ledger file? Current active file will be auto-saved.")) {
+        forceSaveCurrentDay();
+        clearAllLedgerInputs();
+        showOpenModal();
+    }
+}
+
+function clearAllLedgerInputs() {
+    for (let i = 1; i <= 16; i++) {
+        document.getElementById(`ledgerName_${i}`).value = "";
+        document.getElementById(`ledgerDry_${i}`).value = "";
+        document.getElementById(`ledgerFresh_${i}`).value = "";
+        document.getElementById(`ledgerCab_${i}`).value = "";
+        document.getElementById(`ledgerBo_${i}`).value = "";
+        document.getElementById(`ledgerBal_${i}`).value = "";
+        document.getElementById(`ledgerBilling_${i}`).value = "";
+        document.getElementById(`ledgerPay_${i}`).value = "";
+        document.getElementById(`ledgerRem_${i}`).value = "";
+    }
+    clearMainInputs();
+    calculateLedgerTotals();
+}
+
+function clearMainInputs() {
+    document.getElementById("qtyReg").value = "";
+    document.getElementById("qtyFresh").value = "";
+    document.getElementById("qtyCab").value = "";
+    document.getElementById("qtyBo").value = "";
+    document.getElementById("inputBal").value = "";
+    document.getElementById("inputPay").value = "";
+    document.getElementById("syncDry").value = "";
+    document.getElementById("syncFresh").value = "";
+    document.getElementById("syncCab").value = "";
+    document.getElementById("syncBo").value = "";
+    calculateMain();
+}
+
+function formatMoney(num) {
+    if (isNaN(num) || num === 0) return "0";
+    return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function calculateMain() {
+    const qtyReg = parseFloat(document.getElementById("qtyReg").value) || 0;
+    const priceReg = parseFloat(document.getElementById("priceReg").value) || 0;
+    const amountReg = qtyReg * priceReg;
+    document.getElementById("amountReg").textContent = formatMoney(amountReg);
+
+    const qtyFresh = parseFloat(document.getElementById("qtyFresh").value) || 0;
+    const priceFresh = parseFloat(document.getElementById("priceFresh").value) || 0;
+    const amountFresh = qtyFresh * priceFresh;
+    document.getElementById("amountFresh").textContent = formatMoney(amountFresh);
+
+    const qtyCab = parseFloat(document.getElementById("qtyCab").value) || 0;
+    const priceCab = parseFloat(document.getElementById("priceCab").value) || 0;
+    const amountCab = qtyCab * priceCab;
+    document.getElementById("amountCab").textContent = formatMoney(amountCab);
+
+    const qtyBo = parseFloat(document.getElementById("qtyBo").value) || 0;
+    const priceBo = parseFloat(document.getElementById("priceBo").value) || 0;
+    const amountBo = qtyBo * priceBo;
+    document.getElementById("amountBo").textContent = formatMoney(amountBo);
+
+    const totalAmount = amountReg + amountFresh + amountCab + amountBo;
+    document.getElementById("totalAmount").textContent = formatMoney(totalAmount);
+
+    const bal = parseFloat(document.getElementById("inputBal").value) || 0;
+    const pay = parseFloat(document.getElementById("inputPay").value) || 0;
+    const netTotal = totalAmount + bal - pay;
+    document.getElementById("netTotalAmount").textContent = formatMoney(netTotal);
+
+    // Sync back to active row in ledger table
+    if (activeRow >= 1 && activeRow <= 16) {
+        document.getElementById(`ledgerDry_${activeRow}`).value = qtyReg || "";
+        document.getElementById(`ledgerFresh_${activeRow}`).value = qtyFresh || "";
+        document.getElementById(`ledgerCab_${activeRow}`).value = qtyCab || "";
+        document.getElementById(`ledgerBo_${activeRow}`).value = qtyBo || "";
+        document.getElementById(`ledgerBal_${activeRow}`).value = bal || "";
+        document.getElementById(`ledgerBilling_${activeRow}`).value = formatMoney(totalAmount + bal);
+        document.getElementById(`ledgerPay_${activeRow}`).value = pay || "";
+        document.getElementById(`ledgerRem_${activeRow}`).value = formatMoney(netTotal);
+    }
+
+    calculateLedgerTotals();
+    saveLedger();
+}
+
+function syncFromTable(item) {
+    const qty = document.getElementById(`qty${item}`).value;
+    const syncField = document.getElementById(`sync${item === 'Reg' ? 'Dry' : item}`);
+    if (syncField) syncField.value = qty;
+    calculateMain();
+}
+
+function syncFromPanel(item) {
+    const qty = document.getElementById(`sync${item}`).value;
+    const tableField = document.getElementById(`qty${item === 'Dry' ? 'Reg' : item}`);
+    if (tableField) tableField.value = qty;
+    calculateMain();
+}
+
+function updateActiveCustomerName(row) {
+    if (row === activeRow) {
+        const val = document.getElementById(`ledgerName_${row}`).value.trim();
+        document.getElementById("activeCustomerDisplay").textContent = val ? val : `Row ${row}`;
+    }
+}
+
+function loadRowToMain(row) {
+    activeRow = row;
+    const custName = document.getElementById(`ledgerName_${row}`).value.trim();
+    document.getElementById("activeCustomerDisplay").textContent = custName ? custName : `Row ${row}`;
+
+    document.getElementById("qtyReg").value = document.getElementById(`ledgerDry_${row}`).value;
+    document.getElementById("qtyFresh").value = document.getElementById(`ledgerFresh_${row}`).value;
+    document.getElementById("qtyCab").value = document.getElementById(`ledgerCab_${row}`).value;
+    document.getElementById("qtyBo").value = document.getElementById(`ledgerBo_${row}`).value;
+    document.getElementById("inputBal").value = document.getElementById(`ledgerBal_${row}`).value;
+
+    document.getElementById("syncDry").value = document.getElementById(`ledgerDry_${row}`).value;
+    document.getElementById("syncFresh").value = document.getElementById(`ledgerFresh_${row}`).value;
+    document.getElementById("syncCab").value = document.getElementById(`ledgerCab_${row}`).value;
+    document.getElementById("syncBo").value = document.getElementById(`ledgerBo_${row}`).value;
+
+    const rawColln = document.getElementById(`ledgerPay_${row}`).value.replace(/,/g, '');
+    const rawBilling = document.getElementById(`ledgerBilling_${row}`).value.replace(/,/g, '');
+    document.getElementById("inputPay").value = (rawColln !== rawBilling) ? rawColln : "";
+
+    calculateMain();
+}
+
+function handleKeyClick() {
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
+
+    if (tapCount >= 5) {
+        tapCount = 0;
+        isLocked = !isLocked;
+        for (let i = 1; i <= 16; i++) {
+            const input = document.getElementById(`ledgerName_${i}`);
+            input.readOnly = isLocked;
+            input.style.backgroundColor = isLocked ? "#e5e7eb" : "#ffffff";
+        }
+        document.getElementById("lockHeader").textContent = isLocked ? "🔒" : "🔓";
+    }
+}
+
+function handlePriceKeyClick() {
+    priceTapCount++;
+    clearTimeout(priceTapTimer);
+    priceTapTimer = setTimeout(() => { priceTapCount = 0; }, 2000);
+
+    if (priceTapCount >= 5) {
+        priceTapCount = 0;
+        isPriceLocked = !isPriceLocked;
+        const priceInputs = document.querySelectorAll('.price-input');
+        priceInputs.forEach(input => {
+            input.readOnly = isPriceLocked;
+            input.style.backgroundColor = isPriceLocked ? "#e5e7eb" : "#ffffff";
+        });
+        document.getElementById("priceLockHeader").textContent = isPriceLocked ? "Price 🔒" : "Price 🔓";
+    }
 }
 
 function calculateLedgerTotals() {
@@ -139,14 +350,14 @@ function calculateLedgerTotals() {
         sumRem += parseFloat(remStr) || 0;
     }
 
-    document.getElementById("totalDry").textContent = sumDry;
-    document.getElementById("totalFresh").textContent = sumFresh;
-    document.getElementById("totalCab").textContent = sumCab;
+    document.getElementById("totalDry").textContent = formatMoney(sumDry);
+    document.getElementById("totalFresh").textContent = formatMoney(sumFresh);
+    document.getElementById("totalCab").textContent = formatMoney(sumCab);
     document.getElementById("totalBo").textContent = sumBo % 1 === 0 ? sumBo : sumBo.toFixed(1);
-    document.getElementById("totalBal").textContent = sumBal;
-    document.getElementById("totalBilling").textContent = sumBilling;
-    document.getElementById("totalColln").textContent = sumColln;
-    document.getElementById("totalRem").textContent = sumRem;
+    document.getElementById("totalBal").textContent = formatMoney(sumBal);
+    document.getElementById("totalBilling").textContent = formatMoney(sumBilling);
+    document.getElementById("totalColln").textContent = formatMoney(sumColln);
+    document.getElementById("totalRem").textContent = formatMoney(sumRem);
 }
 
 function saveLedger() {
@@ -203,6 +414,8 @@ function loadHistoryFile(dateKey) {
 
     if (!selectedFile) return;
 
+    clearAllLedgerInputs();
+
     currentSessionDate = selectedFile.date;
     currentSessionName = selectedFile.name;
 
@@ -223,6 +436,7 @@ function loadHistoryFile(dateKey) {
 
     document.getElementById("setupModal").style.display = "none";
     setEncodingEditable(true);
+    loadRowToMain(1);
     calculateLedgerTotals();
     saveLedger();
     renderHistoryUI(dateKey);
@@ -305,6 +519,7 @@ function loadLedger() {
 
     document.getElementById("setupModal").style.display = "none";
     setEncodingEditable(true);
+    loadRowToMain(1);
     calculateLedgerTotals();
     renderHistoryUI();
     resetInactivityTimer();
