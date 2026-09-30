@@ -2,324 +2,588 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Order Sheet</title>
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#107c41">
-<style>
-* { box-sizing: border-box; }
-body {
-    margin: 0;
-    padding: 2px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #f8fafc;
-    color: #334155;
-    font-size: 13px;
-}
-.app-container { max-width: 100%; display: flex; flex-direction: column; gap: 2px; }
-.main-layout { display: flex; gap: 2px; align-items: stretch; max-width: 100%; }
-.left-panel {
-    flex: 1; min-width: 0; background: #ffffff; padding: 3px;
-    border-radius: 6px; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between;
-}
-.right-panel {
-    width: 110px; background: #ffffff; padding: 4px;
-    border-radius: 6px; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 6px; justify-content: center;
-}
-.bottom-bar { display: flex; gap: 2px; align-items: stretch; width: 100%; }
-.quick-panel {
-    flex: 1; min-width: 0; background: #ffffff; padding: 3px;
-    border-radius: 6px; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;
-}
-.quick-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.quick-table th {
-    background-color: #f1f5f9; font-size: 10px; font-weight: 700; color: #475569;
-    text-transform: uppercase; border: 1px solid #e2e8f0; padding: 3px 1px; text-align: center;
-}
-.quick-table td { border: 1px solid #e2e8f0; padding: 3px 2px; text-align: center; }
-.bottom-m-panel {
-    width: 95px; background: #ffffff; padding: 3px;
-    border-radius: 6px; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;
-}
-.bottom-m-btn {
-    width: 100%; height: 100%; min-height: 44px; border: 1px solid #bfdbfe;
-    border-radius: 4px; background-color: #dbeafe; color: #1d4ed8; font-size: 13px; font-weight: 700; cursor: pointer;
-}
-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-th, td { border: 1px solid #e2e8f0; padding: 4px 1px; text-align: center; overflow: hidden; }
-th { background-color: #f1f5f9; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; }
-th.price-header { cursor: pointer; user-select: none; }
-input {
-    width: 100%; padding: 3px 1px; text-align: center;
-    border: 1px solid #cbd5e1; border-radius: 3px; font-size: 12px; background-color: #fff;
-}
-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); }
-input[readonly] { background-color: #f8fafc; color: #475569; font-weight: 500; border-color: #e2e8f0; }
-#total { color: #dc2626; font-weight: 700; background-color: #fef2f2; border-color: #fecaca; }
-.qty-col { width: 28%; }
-.price-col { width: 20%; }
-.label-col { width: 18%; font-weight: 600; font-size: 11px; color: #1e293b; background-color: #f8fafc; }
-.amt-col { width: 34%; }
-.utility-row { background-color: #f8fafc; }
-.auto-formula { text-align: left; font-size: 8px; font-style: italic; color: #94a3b8; padding-left: 2px; }
-.clear-button {
-    width: 100%; padding: 3px 4px; border: 1px solid #fecaca; border-radius: 3px;
-    background-color: #fef2f2; color: #dc2626; font-size: 10px; font-weight: 700; cursor: pointer;
-}
-.mem-btn {
-    width: 100%; padding: 3px 1px; border: 1px solid #cbd5e1; border-radius: 3px;
-    background-color: #e2e8f0; color: #1e293b; font-size: 10px; font-weight: 700; cursor: pointer;
-}
-.mem-btn.m-plus { background-color: #dbeafe; border-color: #bfdbfe; color: #1d4ed8; }
-.mem-btn.mc { background-color: #fee2e2; border-color: #fecaca; color: #dc2626; }
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+<title>Miki Ledger & Calculator</title>
 
-/* Right Panel Action Buttons */
-.side-btn {
-    width: 100%; padding: 10px 4px; border: 1px solid #cbd5e1; border-radius: 4px;
-    font-size: 11px; font-weight: 700; cursor: pointer; text-align: center;
+<style>
+* {
+    box-sizing: border-box;
 }
-.side-btn.open { background-color: #dbeafe; border-color: #bfdbfe; color: #1d4ed8; }
-.side-btn.clear { background-color: #fee2e2; border-color: #fecaca; color: #dc2626; }
-.footer-credit { text-align: center; font-style: italic; font-size: 9px; color: #94a3b8; margin-top: 2px; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    overscroll-behavior: none;
+    touch-action: pan-x pan-y;
+}
+
+.main-wrapper {
+    padding: 8px;
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* SESSION & ACTIVE FILE HEADER */
+.session-bar {
+    background: #1e293b;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    border: 1px solid #cbd5e1;
+    border-bottom: none;
+}
+
+.session-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: bold;
+}
+
+.btn-group {
+    display: flex;
+    gap: 4px;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 11px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-edit { background: #3b82f6; color: white; }
+.btn-del { background: #ef4444; color: white; }
+.save-btn { background: #10b981; color: white; }
+.clear-btn { background: #f59e0b; color: white; }
+
+/* TABLE CONTAINERS */
+.table-box {
+    width: 100%;
+    margin: 0;
+    background: white;
+    border: 1px solid #cbd5e1;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+th, td {
+    border: 1px solid #cbd5e1;
+    height: 25px; 
+    padding: 1px 2px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+th {
+    background: #0f172a;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+td {
+    background: white;
+    font-size: 11px;
+}
+
+.colln-header {
+    background: #f59e0b !important;
+    color: #000000 !important;
+}
+
+table input {
+    width: 100%;
+    height: 23px;
+    padding: 1px 2px;
+    border: 1px solid #9ca3af;
+    border-radius: 2px;
+    text-align: center;
+    font-size: 11px;
+    background: white;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+table input.name-input {
+    text-align: left;
+    padding-left: 4px;
+}
+
+table input.readonly-col {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-weight: bold;
+}
+
+table input.colln-input {
+    background: #fef3c7 !important;
+    border: 1px solid #f59e0b !important;
+    font-weight: bold;
+}
+
+.net-total-red {
+    font-weight: bold;
+    color: #dc2626;
+    font-size: 10px;
+    padding: 0 1px;
+}
+
+/* GREEN SLIDER TOGGLE BAR */
+.slider-toggle-bar {
+    width: 100%;
+    height: 22px;
+    background: #059669;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid #047857;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    margin-bottom: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.slider-toggle-bar:hover {
+    background: #10b981;
+}
+
+.slider-pill {
+    width: 40px;
+    height: 4px;
+    background: white;
+    border-radius: 2px;
+}
+
+.slider-icon {
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 8px;
+}
+
+/* EXPANDABLE SUB-TABLE */
+.expandable-table-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease-out;
+    background: white;
+    border: 1px solid #cbd5e1;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.expandable-table-container.open {
+    max-height: 300px;
+}
+
+.sub-table th {
+    background: #1f2937;
+    font-size: 9px;
+    cursor: pointer;
+}
+
+.disabled-cell {
+    background: #e2e8f0;
+}
+
+/* RED HIGHLIGHTED OVERALL TOTAL ROW */
+.overall-total-cell {
+    background: #fef2f2 !important;
+    border: 1.5px solid #ef4444 !important;
+}
+
+.overall-total-cell input {
+    background: #fee2e2 !important;
+    color: #dc2626 !important;
+    font-weight: bold !important;
+    font-size: 11px !important;
+    border: 1px solid #f87171 !important;
+}
+
+/* HISTORY SECTION */
+.history-section {
+    background: white;
+    border: 1px solid #cbd5e1;
+    margin-top: 8px;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.history-title {
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    color: #1e293b;
+}
+
+.history-list {
+    max-height: 140px;
+    overflow-y: auto;
+    font-size: 11px;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 4px;
+    border-bottom: 1px solid #f1f5f9;
+}
 </style>
 </head>
+
 <body>
 
-<div class="app-container">
-<div class="main-layout">
-<div class="left-panel">
-<div>
-<table>
-<tr>
-    <th class="qty-col">QTY</th>
-    <th class="price-col price-header" onclick="handlePriceHeaderTap()" title="Tap 5 times">Unit Price</th>
-    <th class="label-col">A</th>
-    <th class="amt-col">Amount</th>
-</tr>
-<tr>
-    <td><input type="number" id="qty_dry" oninput="syncAndCalculate('qty_dry')"></td>
-    <td><input type="number" id="price_dry" value="45" readonly oninput="saveAndCalculate()"></td>
-    <td class="label-col">Dry</td>
-    <td><input type="text" id="amt_dry" readonly></td>
-</tr>
-<tr>
-    <td><input type="number" id="qty_fresh" oninput="syncAndCalculate('qty_fresh')"></td>
-    <td><input type="number" id="price_fresh" value="45" readonly oninput="saveAndCalculate()"></td>
-    <td class="label-col">Fresh</td>
-    <td><input type="text" id="amt_fresh" readonly></td>
-</tr>
-<tr>
-    <td><input type="number" id="qty_cab" oninput="syncAndCalculate('qty_cab')"></td>
-    <td><input type="number" id="price_cab" value="40" readonly oninput="saveAndCalculate()"></td>
-    <td class="label-col">Cab</td>
-    <td><input type="text" id="amt_cab" readonly></td>
-</tr>
-<tr>
-    <td><input type="number" id="qty_bo" oninput="syncAndCalculate('qty_bo')"></td>
-    <td><input type="number" id="price_bo" value="45" readonly oninput="saveAndCalculate()"></td>
-    <td class="label-col">BO</td>
-    <td><input type="text" id="amt_bo" readonly></td>
-</tr>
-<tr class="utility-row">
-    <td colspan="2" class="auto-formula">Auto: (BO ÷ 2) × Price</td>
-    <td colspan="2"><button class="clear-button" onclick="clearQuantities()">CLEAR QTY</button></td>
-</tr>
-<tr>
-    <td><button class="mem-btn m-plus" onclick="memoryAdd()">M+</button></td>
-    <td colspan="2" class="label-col">Sub Total</td>
-    <td><input type="text" id="subtotal" readonly></td>
-</tr>
-<tr>
-    <td><button class="mem-btn mc" onclick="memoryClear()">MC</button></td>
-    <td colspan="2" class="label-col">Payment</td>
-    <td><input type="number" id="payment" oninput="saveAndCalculate()"></td>
-</tr>
-<tr>
-    <td><button class="mem-btn" onclick="memoryRecall()">MR</button></td>
-    <td colspan="2" class="label-col">Bal</td>
-    <td><input type="number" id="bal" oninput="saveAndCalculate()"></td>
-</tr>
-<tr>
-    <td><input type="text" id="m_display" readonly style="font-size:10px; font-weight:bold; color:#1d4ed8; background:#eff6ff;"></td>
-    <td colspan="2" class="label-col">Total</td>
-    <td><input type="text" id="total" readonly></td>
-</tr>
-</table>
-</div>
-<div class="footer-credit">created by paulm</div>
-</div>
+<div class="main-wrapper">
 
-<div class="right-panel">
-    <button class="side-btn open" id="mainOpenBtn" onclick="triggerExtOpenAll()">📂 OPEN ALL</button>
-    <button class="side-btn clear" onclick="triggerExtClear()">🗑️ CLEAR</button>
-</div>
-</div>
+    <!-- Active Session Header -->
+    <div class="session-bar">
+        <div class="session-info">
+            <span id="displayFileDate">Date: -- | --</span>
+            <span>|</span>
+            <span id="displayFileName">paul</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn-sm save-btn" onclick="saveCurrentDay()">Save Day</button>
+            <button class="btn-sm clear-btn" onclick="startNewDay()">New Day</button>
+        </div>
+    </div>
 
-<div class="bottom-bar">
-    <div class="quick-panel">
-        <table class="quick-table">
-            <tr><th>Dry</th><th>Fresh</th><th>Cab</th><th>Bo</th></tr>
-            <tr>
-                <td><input type="number" id="quick_qty_dry" oninput="syncAndCalculate('quick_qty_dry')"></td>
-                <td><input type="number" id="quick_qty_fresh" oninput="syncAndCalculate('quick_qty_fresh')"></td>
-                <td><input type="number" id="quick_qty_cab" oninput="syncAndCalculate('quick_qty_cab')"></td>
-                <td><input type="number" id="quick_qty_bo" oninput="syncAndCalculate('quick_qty_bo')"></td>
-            </tr>
+    <!-- MAIN TABLE 2 (9 COLUMNS) -->
+    <div class="table-box">
+        <table id="mainLedgerTable">
+            <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 15%;">
+                <col style="width: 15%;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th id="mainLockHeader" onclick="handleMainHeaderTap()">🔒</th>
+                    <th>Dry</th>
+                    <th>Fresh</th>
+                    <th>Cab</th>
+                    <th>BO</th>
+                    <th>Bal</th>
+                    <th>Billing</th>
+                    <th class="colln-header">Coll'n</th>
+                    <th>Utang</th>
+                </tr>
+            </thead>
+            <tbody id="mainTableBody">
+                <!-- Rows 1 to 15 auto-generated by JavaScript -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td style="color: #dc2626; font-size: 9px; font-weight: bold; text-align: left;">NET TOTAL</td>
+                    <td class="net-total-red" id="net_dry">0</td>
+                    <td class="net-total-red" id="net_fresh">0</td>
+                    <td class="net-total-red" id="net_cab">0</td>
+                    <td class="net-total-red" id="net_bo">0</td>
+                    <td class="net-total-red" id="net_bal">0</td>
+                    <td class="net-total-red" id="net_billing">0</td>
+                    <td class="net-total-red" id="net_colln">0</td>
+                    <td class="net-total-red" id="net_utang">0</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
-    <div class="bottom-m-panel">
-        <button class="bottom-m-btn" onclick="memoryAdd()">M+</button>
+
+    <!-- TINY GREEN SLIDER BAR -->
+    <div class="slider-toggle-bar" id="sliderToggle" onclick="toggleSubTable()">
+        <div class="slider-pill"></div>
+        <span class="slider-icon" id="sliderIcon">▼ Tap to Open Sub-Table</span>
     </div>
+
+    <!-- EXPANDABLE SUB-TABLE -->
+    <div class="expandable-table-container" id="expandableContainer">
+        <table class="sub-table">
+            <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 15%;">
+                <col style="width: 15%;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th id="subItemHeader1" onclick="handleSubHeaderTap()">Item 🔒</th>
+                    <th>Amt</th>
+                    <th id="subItemHeader2" onclick="handleSubHeaderTap()">Item 🔒</th>
+                    <th>Amt</th>
+                    <th>Summary</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Row 1 -->
+                <tr>
+                    <td><input type="text" class="sub-item-input" value="Item 1" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt1_1" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td><input type="text" class="sub-item-input" value="Item 7" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt2_1" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td><input type="text" id="sub_sum_total" class="readonly-col" readonly placeholder="Sum"></td>
+                    <td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td>
+                </tr>
+                <!-- Row 2 -->
+                <tr>
+                    <td><input type="text" class="sub-item-input" value="Item 2" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt1_2" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td><input type="text" class="sub-item-input" value="Item 8" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt2_2" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td><input type="text" id="sub_net_bal" class="readonly-col" readonly placeholder="Bal"></td>
+                    <td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td>
+                </tr>
+                <!-- Row 3 -->
+                <tr>
+                    <td><input type="text" class="sub-item-input" value="Item 3" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt1_3" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td><input type="text" class="sub-item-input" value="Item 9" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt2_3" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td><input type="number" id="sub_coh_input" placeholder="COH" oninput="calculateSubTable()"></td>
+                    <td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td>
+                </tr>
+                <!-- Row 4 -->
+                <tr>
+                    <td><input type="text" class="sub-item-input" value="Item 4" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt1_4" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td><input type="text" class="sub-item-input" value="Item 10" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt2_4" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td class="overall-total-cell"><input type="text" id="sub_overall_total" readonly placeholder="Overall"></td>
+                    <td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td>
+                </tr>
+                <!-- Row 5 -->
+                <tr>
+                    <td><input type="text" class="sub-item-input" value="Item 5" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt1_5" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td><input type="text" class="sub-item-input" value="Item 11" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt2_5" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td class="disabled-cell"></td>
+                    <td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td>
+                </tr>
+                <!-- Row 6 -->
+                <tr>
+                    <td><input type="text" class="sub-item-input" value="Item 6" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt1_6" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td><input type="text" class="sub-item-input" value="Item 12" readonly style="background-color: #e2e8f0;"></td>
+                    <td><input type="number" id="sub_amt2_6" class="sub-amt-input" oninput="calculateSubTable()"></td>
+                    <td class="disabled-cell"></td>
+                    <td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td><td class="disabled-cell"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SAVED FILES HISTORY SECTION -->
+    <div class="history-section">
+        <div class="history-title">
+            <span>Saved Files (30-Day History)</span>
+            <span id="historyCount" style="color: #64748b; font-size: 11px;">0 / 30</span>
+        </div>
+        <div class="history-list" id="historyContainer">
+            <!-- Saved files loaded dynamically -->
+        </div>
+    </div>
+
 </div>
-
-<iframe src="extension.html" style="width:100%; height:500px; border:none; border-radius:6px; margin-top:4px; background:transparent;" id="extFrame"></iframe>
-
-</div>
-
 <script>
-let tapCount = 0; let tapTimer = null; let isPricesUnlocked = false;
-const inputIds = ['qty_dry', 'price_dry', 'qty_fresh', 'price_fresh', 'qty_cab', 'price_cab', 'qty_bo', 'price_bo', 'payment', 'bal'];
+// SUB-TABLE SLIDER TOGGLE
+function toggleSubTable() {
+    const container = document.getElementById("expandableContainer");
+    const icon = document.getElementById("sliderIcon");
 
-window.onload = function() {
-    try {
-        inputIds.forEach(id => {
-            let savedVal = localStorage.getItem('order_' + id);
-            if (savedVal !== null) {
-                let el = document.getElementById(id);
-                if (el) el.value = savedVal;
-                if (id.startsWith('qty_')) {
-                    let quickEl = document.getElementById('quick_' + id);
-                    if (quickEl) quickEl.value = savedVal;
-                }
-            }
-        });
-    } catch (e) {
-        console.warn('LocalStorage error on load:', e);
-    }
-    calculate();
-};
-
-function saveAndCalculate() {
-    try {
-        inputIds.forEach(id => {
-            let el = document.getElementById(id);
-            if (el) localStorage.setItem('order_' + id, el.value);
-        });
-    } catch (e) {
-        console.warn('LocalStorage error on save:', e);
-    }
-    calculate();
-}
-
-function triggerExtOpenAll() {
-    let iframe = document.getElementById('extFrame');
-    if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage('toggleOpenAll', '*');
-    }
-}
-
-function triggerExtClear() {
-    let iframe = document.getElementById('extFrame');
-    if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage('clearAllRows', '*');
-    }
-}
-
-function handlePriceHeaderTap() {
-    tapCount++;
-    clearTimeout(tapTimer);
-    if (tapCount >= 5) {
-        togglePricesLock();
-        tapCount = 0;
+    if (container.classList.contains("open")) {
+        container.classList.remove("open");
+        icon.textContent = "▼ Tap to Open Sub-Table";
     } else {
-        tapTimer = setTimeout(() => { tapCount = 0; }, 600);
+        container.classList.add("open");
+        icon.textContent = "▲ Tap to Close Sub-Table";
     }
 }
 
-function togglePricesLock() {
-    isPricesUnlocked = !isPricesUnlocked;
-    ['price_dry', 'price_fresh', 'price_cab', 'price_bo'].forEach(id => {
-        let input = document.getElementById(id);
-        if (input) {
-            if (isPricesUnlocked) input.removeAttribute('readonly');
-            else input.setAttribute('readonly', 'readonly');
-        }
-    });
-    let header = document.querySelector('.price-header');
-    if (header) header.style.backgroundColor = isPricesUnlocked ? '#fef08a' : '#f1f5f9';
+// 5-TAP HEADER LOCK / UNLOCK FOR SUB-TABLE
+let subTapCount = 0;
+let subTapTimer = null;
+let isSubItemsLocked = true;
+
+function handleSubHeaderTap() {
+    subTapCount++;
+    clearTimeout(subTapTimer);
+    subTapTimer = setTimeout(() => {
+        subTapCount = 0;
+    }, 1000);
+
+    if (subTapCount >= 5) {
+        subTapCount = 0;
+        isSubItemsLocked = !isSubItemsLocked;
+        toggleSubItemLock(isSubItemsLocked);
+    }
 }
 
-function syncAndCalculate(sourceId) {
-    let el = document.getElementById(sourceId);
-    if (!el) return;
-    let val = el.value;
-    if (sourceId.startsWith('quick_')) {
-        let targetId = sourceId.replace('quick_', '');
-        let targetEl = document.getElementById(targetId);
-        if (targetEl) targetEl.value = val;
+function toggleSubItemLock(locked) {
+    const h1 = document.getElementById("subItemHeader1");
+    const h2 = document.getElementById("subItemHeader2");
+    const label = locked ? "Item 🔒" : "Item 🔑";
+    h1.textContent = label;
+    h2.textContent = label;
+
+    const itemInputs = document.querySelectorAll(".sub-item-input");
+    itemInputs.forEach(input => {
+        input.readOnly = locked;
+        input.style.backgroundColor = locked ? "#e2e8f0" : "white";
+    });
+}
+
+// SUB-TABLE AUTOMATIC CALCULATIONS
+function calculateSubTable() {
+    let sumAmounts = 0;
+
+    // Compute Sum of Column 2 (Rows 1-6) + Column 4 (Rows 1-6)
+    for (let r = 1; r <= 6; r++) {
+        const val1 = parseFloat(document.getElementById(`sub_amt1_${r}`).value) || 0;
+        const val2 = parseFloat(document.getElementById(`sub_amt2_${r}`).value) || 0;
+        sumAmounts += val1 + val2;
+    }
+
+    // Row 1: Sum of All Amounts
+    document.getElementById("sub_sum_total").value = sumAmounts !== 0 ? sumAmounts.toLocaleString() : "";
+
+    // Row 2: Net Balance (Net Total minus Sum)
+    const netUtangElem = document.getElementById("net_utang");
+    const mainNetTotal = parseFloat(netUtangElem ? netUtangElem.textContent.replace(/,/g, '') : 0) || 0;
+    const netBal = mainNetTotal - sumAmounts;
+    document.getElementById("sub_net_bal").value = (mainNetTotal !== 0 || sumAmounts !== 0) ? netBal.toLocaleString() : "";
+
+    // Row 3 & 4: COH Input and Red Highlighted Overall Total
+    const cohInputElem = document.getElementById("sub_coh_input");
+    const cohVal = parseFloat(cohInputElem.value) || 0;
+    const hasCohInput = cohInputElem.value.trim() !== "";
+
+    if (hasCohInput || (mainNetTotal !== 0 || sumAmounts !== 0)) {
+        const overallTotal = cohVal - netBal;
+        document.getElementById("sub_overall_total").value = overallTotal.toLocaleString();
     } else {
-        let quickEl = document.getElementById('quick_' + sourceId);
-        if (quickEl) quickEl.value = val;
+        document.getElementById("sub_overall_total").value = "";
     }
-    saveAndCalculate();
 }
 
-function clearQuantities() {
-    ['qty_dry', 'qty_fresh', 'qty_cab', 'qty_bo', 'payment', 'bal'].forEach(id => {
-        let el = document.getElementById(id);
-        if (el) el.value = '';
-        let quickEl = document.getElementById('quick_' + id);
-        if (quickEl) quickEl.value = '';
-        localStorage.removeItem('order_' + id);
+// INITIALIZE MAIN TABLE ROWS & DUMMY DATA
+function renderMainTableRows() {
+    const tbody = document.getElementById("mainTableBody");
+    if(!tbody) return;
+    
+    let rowsHtml = "";
+    for (let i = 1; i <= 15; i++) {
+        rowsHtml += `
+            <tr>
+                <td><input type="text" class="name-input" readonly value="Customer ${i}" style="background-color: #e2e8f0;"></td>
+                <td><input type="number" class="readonly-col" readonly></td>
+                <td><input type="number" class="readonly-col" readonly></td>
+                <td><input type="number" class="readonly-col" readonly></td>
+                <td><input type="number" class="readonly-col" readonly></td>
+                <td><input type="number" class="readonly-col" readonly></td>
+                <td><input type="number" class="readonly-col" readonly></td>
+                <td><input type="number" class="readonly-col colln-input" readonly></td>
+                <td><input type="number" class="readonly-col" readonly></td>
+            </tr>
+        `;
+    }
+    tbody.innerHTML = rowsHtml;
+}
+
+// HISTORY AND LOCALSTORAGE HELPERS
+function loadHistory() {
+    const historyContainer = document.getElementById("historyContainer");
+    const historyCount = document.getElementById("historyCount");
+    if (!historyContainer) return;
+
+    const saved = JSON.parse(localStorage.getItem("miki_saved_files") || "[]");
+    historyCount.textContent = `${saved.length} / 30`;
+
+    if (saved.length === 0) {
+        historyContainer.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:10px;">No saved history yet</div>';
+        return;
+    }
+
+    let html = "";
+    saved.forEach((item, index) => {
+        html += `
+            <div class="history-item">
+                <span>${item.date} - ${item.name}</span>
+                <div>
+                    <button class="btn-sm btn-edit" onclick="loadSavedFile(${index})">Edit</button>
+                    <button class="btn-sm btn-del" onclick="deleteSavedFile(${index})">Del</button>
+                </div>
+            </div>
+        `;
     });
-    calculate();
+    historyContainer.innerHTML = html;
 }
 
-function calculate() {
-    let getVal = (id) => {
-        let el = document.getElementById(id);
-        return el && el.value !== '' ? parseFloat(el.value) || 0 : 0;
-    };
-    let setVal = (id, val) => {
-        let el = document.getElementById(id);
-        if (el) el.value = (val && val !== 0) ? Math.round(val).toLocaleString() : '';
-    };
-
-    let amtDry = getVal('price_dry') * getVal('qty_dry');
-    let amtFresh = getVal('price_fresh') * getVal('qty_fresh');
-    let amtCab = getVal('price_cab') * getVal('qty_cab');
-    let qtyBo = getVal('qty_bo');
-    let boUnitPrice = getVal('price_bo');
-    let amtBo = (qtyBo / 2) * boUnitPrice;
-
-    setVal('amt_dry', amtDry);
-    setVal('amt_fresh', amtFresh);
-    setVal('amt_cab', amtCab);
-    setVal('amt_bo', amtBo);
-
-    let subTotal = amtFresh + amtDry + amtCab - amtBo;
-    setVal('subtotal', subTotal);
-
-    let payment = getVal('payment');
-    let bal = getVal('bal');
-    let total = subTotal - payment + bal;
-    setVal('total', total);
-}
-
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('./sw.js')
-            .then(function(registration) {
-                console.log('Service worker registered:', registration.scope);
-            })
-            .catch(function(error) {
-                console.error('Service worker registration failed:', error);
-            });
+function saveCurrentDay() {
+    const saved = JSON.parse(localStorage.getItem("miki_saved_files") || "[]");
+    const today = new Date().toISOString().split('T')[0];
+    
+    saved.unshift({
+        date: today,
+        name: "paul"
     });
+
+    if(saved.length > 30) saved.pop();
+
+    localStorage.setItem("miki_saved_files", JSON.stringify(saved));
+    loadHistory();
+    alert("Saved successfully!");
 }
+
+function startNewDay() {
+    if(confirm("Start new day? Unsaved changes will be cleared.")) {
+        document.querySelectorAll("input[type='number']").forEach(i => i.value = "");
+        calculateSubTable();
+    }
+}
+
+// RUN ON LOAD
+window.addEventListener("DOMContentLoaded", () => {
+    renderMainTableRows();
+    loadHistory();
+    calculateSubTable();
+});
 </script>
 
 </body>
