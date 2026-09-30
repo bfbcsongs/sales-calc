@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-<title>Miki Ledger & Calculator</title>
+<title>Miki Table & Ledger</title>
+
+<!-- PWA Manifest Link -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111827">
 
 <style>
 * {
@@ -22,7 +26,7 @@ html, body {
 }
 
 .main-wrapper {
-    padding: 8px;
+    padding: 15px 10px 10px 10px;
     width: 100%;
     max-width: 650px;
     margin: 0 auto;
@@ -30,57 +34,171 @@ html, body {
     flex-direction: column;
 }
 
-/* SESSION & ACTIVE FILE HEADER */
+/* SESSION HEADER ABOVE TABLE 2 */
 .session-bar {
     background: #1e293b;
     color: white;
-    padding: 8px 10px;
-    border-radius: 6px 6px 0 0;
+    padding: 8px 12px;
+    border-radius: 4px 4px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    border: 1px solid #d1d5db;
     border-bottom: none;
 }
 
 .session-info {
     display: flex;
-    align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-weight: bold;
 }
 
-.btn-group {
+/* MODAL STYLES */
+.setup-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
     display: flex;
-    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.setup-modal {
+    position: relative;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.modal-close-btn:hover {
+    color: #111827;
+}
+
+.setup-modal h3 {
+    margin-top: 0;
+    color: #111827;
+    padding-right: 20px;
+}
+
+.setup-modal label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.setup-modal input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.setup-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.setup-btn:hover {
+    background: #1d4ed8;
+}
+
+/* HISTORY DRAWER */
+.history-section {
+    background: white;
+    border: 1px solid #d1d5db;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-list {
+    max-height: 120px;
+    overflow-y: auto;
+    font-size: 12px;
+    border: 1px solid #f3f4f6;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px;
+    border-bottom: 1px solid #f3f4f6;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.history-item.selected-file {
+    background-color: #fef08a !important;
+    border: 1px solid #facc15;
+}
+
+.history-item:last-child {
+    border-bottom: none;
 }
 
 .btn-sm {
     padding: 4px 8px;
     font-size: 11px;
     border: none;
-    border-radius: 4px;
+    border-radius: 3px;
     cursor: pointer;
-    font-weight: bold;
 }
 
 .btn-edit { background: #3b82f6; color: white; }
-.btn-del { background: #ef4444; color: white; }
-.save-btn { background: #10b981; color: white; }
-.clear-btn { background: #f59e0b; color: white; }
+.btn-del { background: #ef4444; color: white; margin-left: 4px; }
 
-/* TABLE CONTAINERS */
 .table-box {
     width: 100%;
-    margin: 0;
+    margin: 0 auto 20px auto;
     background: white;
-    border: 1px solid #cbd5e1;
-    overflow-x: auto;
+    border: 1px solid #d1d5db;
 }
 
-.table-box-margin {
-    margin-bottom: 10px;
+.table-box-2 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    border-top: none;
 }
 
 table {
@@ -89,29 +207,93 @@ table {
     table-layout: fixed;
 }
 
-th, td {
-    border: 1px solid #cbd5e1;
-    height: 25px; 
-    padding: 1px 2px;
+th,
+td {
+    border: 1px solid #d1d5db;
+    height: 26px; 
+    padding: 2px 4px;
     text-align: center;
     vertical-align: middle;
 }
 
 th {
-    background: #0f172a;
+    background: #111827;
     color: white;
-    font-size: 10px;
+    font-size: 13px;
     font-weight: bold;
 }
 
 td {
     background: white;
-    font-size: 11px;
+    font-size: 14px;
 }
 
-.table1-header {
-    background: #1e3a8a !important;
-    color: white !important;
+.miki {
+    text-align: left;
+    padding-left: 12px;
+    font-weight: bold;
+}
+
+.label-cell {
+    font-weight: bold;
+    text-align: center;
+}
+
+.active-customer-box {
+    text-align: center;
+    font-weight: bold;
+    color: #1d4ed8;
+    font-size: 15px;
+    background: #eff6ff;
+    padding: 4px;
+    border-radius: 4px;
+    word-break: break-word;
+}
+
+table input {
+    width: 100%;
+    max-width: 100%;
+    height: 22px;
+    padding: 2px;
+    border: 1px solid #9ca3af;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    background: white;
+}
+
+.miki-net-total-large {
+    font-size: 10px !important;
+    font-weight: bold;
+    color: #dc2626;
+    text-align: left;
+    padding-left: 12px;
+}
+
+.net-total-large {
+    font-size: 25px !important;
+    font-weight: bold;
+    color: #dc2626;
+}
+
+.table-box-2 td {
+    padding: 1px 2px;
+}
+
+.table-box-2 table input {
+    font-size: 11px;
+    height: 24px;
+    padding: 1px 2px;
+}
+
+.table-box-2 table input.name-input {
+    text-align: left;
+    padding-left: 4px;
+}
+
+.table-box-2 table input.readonly-col {
+    background: #f9fafb;
+    border: none;
 }
 
 .colln-header {
@@ -119,32 +301,30 @@ td {
     color: #000000 !important;
 }
 
-table input {
-    width: 100%;
-    height: 23px;
-    padding: 1px 2px;
-    border: 1px solid #9ca3af;
-    border-radius: 2px;
-    text-align: center;
-    font-size: 11px;
-    background: white;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-}
-
-table input.name-input {
-    text-align: left;
-    padding-left: 4px;
-}
-
-table input.readonly-col {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+.table-box-2 table input.colln-input {
+    background: #fef3c7 !important;
+    border: 1px solid #f59e0b !important;
     font-weight: bold;
 }
 
-table input.colln-input {
-    background: #fef3c7 !important;
-    border: 1px solid #f59e0b !important;
+.table-box-2 th, th.lockable-header {
+    font-size: 10px;
+    padding: 2px 1px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.direct-amount-input {
+    width: 100% !important;
+    height: 24px !important;
+    font-weight: bold;
+}
+
+table input:focus {
+    outline: 2px solid #94a3b8;
+}
+
+.amount {
     font-weight: bold;
 }
 
@@ -155,7 +335,72 @@ table input.colln-input {
     padding: 0 1px;
 }
 
-/* GREEN SLIDER TOGGLE BAR */
+.sync-panel {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) 90px;
+    gap: 6px;
+    padding: 10px;
+    background: #111827;
+    border-top: 1px solid #d1d5db;
+    align-items: flex-end;
+}
+
+.sync-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.sync-cell label {
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.sync-cell input {
+    width: 100%;
+    height: 32px;
+    padding: 4px;
+    border: 1px solid #9ca3af;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    background: white;
+}
+
+.btn-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.action-btn {
+    width: 100%;
+    height: 32px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.clear-btn { background: #ef4444; }
+.clear-btn:hover { background: #dc2626; }
+
+.save-btn { background: #10b981; }
+.save-btn:hover { background: #059669; }
+
+.install-btn {
+    background: #2563eb;
+    display: none;
+}
+.install-btn:hover { background: #1d4ed8; }
+
+/* GREEN SLIDER BAR & SUB-TABLE STYLES */
 .slider-toggle-bar {
     width: 100%;
     height: 22px;
@@ -169,12 +414,7 @@ table input.colln-input {
     border: 1px solid #047857;
     border-top: none;
     border-radius: 0 0 6px 6px;
-    margin-bottom: 6px;
-    transition: background-color 0.2s ease;
-}
-
-.slider-toggle-bar:hover {
-    background: #10b981;
+    margin-bottom: 8px;
 }
 
 .slider-pill {
@@ -190,7 +430,6 @@ table input.colln-input {
     margin-left: 8px;
 }
 
-/* EXPANDABLE SUB-TABLE */
 .expandable-table-container {
     max-height: 0;
     overflow: hidden;
@@ -215,7 +454,6 @@ table input.colln-input {
     background: #e2e8f0;
 }
 
-/* RED HIGHLIGHTED OVERALL TOTAL ROW */
 .overall-total-cell {
     background: #fef2f2 !important;
     border: 1.5px solid #ef4444 !important;
@@ -229,127 +467,193 @@ table input.colln-input {
     border: 1px solid #f87171 !important;
 }
 
-/* HISTORY SECTION */
-.history-section {
-    background: white;
-    border: 1px solid #cbd5e1;
-    margin-top: 8px;
-    padding: 10px;
-    border-radius: 6px;
-}
-
-.history-title {
-    font-weight: bold;
-    font-size: 12px;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    color: #1e293b;
-}
-
-.history-list {
-    max-height: 140px;
-    overflow-y: auto;
-    font-size: 11px;
-}
-
-.history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 4px;
-    border-bottom: 1px solid #f1f5f9;
+@media (max-width: 400px) {
+    th, td { height: 24px; padding: 1px; }
+    th { font-size: 9px; }
+    td { font-size: 9.5px; }
+    .table-box-2 table input { font-size: 9.5px; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="main-wrapper">
+<!-- DYNAMIC SETUP / CONFIRMATION MODAL -->
+<div id="setupModal" class="setup-modal-overlay">
+    <div class="setup-modal">
+        <button class="modal-close-btn" onclick="closeSetupModal()" title="Close">&times;</button>
+        <h3 id="modalTitle">Start New Ledger File</h3>
+        <p id="modalSubtext" style="font-size: 12px; color: #6b7280;">Please fill out both the Date and Name to unlock encoding.</p>
+        <label for="modalDateInput">Date</label>
+        <input type="date" id="modalDateInput">
+        <label for="modalNameInput">Route / Salesman Name</label>
+        <input type="text" id="modalNameInput" placeholder="e.g. Route A - John">
+        <button id="modalActionBtn" class="setup-btn" onclick="handleModalSubmit()">Open Ledger</button>
+    </div>
+</div>
 
-    <!-- Active Session Header -->
+<div class="main-wrapper">
+    <!-- FIRST TABLE (YOUR EXACT ORIGINAL CALCULATOR TABLE) -->
+    <div class="table-box">
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th id="priceLockHeader" class="lockable-header" onclick="handlePriceKeyClick()" title="Tap 5 times to Lock/Unlock Prices">Price 🔒</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td class="miki">REG</td>
+            <td><input type="number" id="qtyReg" min="0" step="any" oninput="syncFromTable('Reg')"></td>
+            <td><input type="number" id="priceReg" class="price-input" min="0" step="any" value="45" oninput="calculateMain()" readonly style="background-color: #e5e7eb;"></td>
+            <td class="amount" id="amountReg">0</td>
+        </tr>
+        <tr>
+            <td class="miki">FRESH</td>
+            <td><input type="number" id="qtyFresh" min="0" step="any" oninput="syncFromTable('Fresh')"></td>
+            <td><input type="number" id="priceFresh" class="price-input" min="0" step="any" value="45" oninput="calculateMain()" readonly style="background-color: #e5e7eb;"></td>
+            <td class="amount" id="amountFresh">0</td>
+        </tr>
+        <tr>
+            <td class="miki">CAB</td>
+            <td><input type="number" id="qtyCab" min="0" step="any" oninput="syncFromTable('Cab')"></td>
+            <td><input type="number" id="priceCab" class="price-input" min="0" step="any" value="40" oninput="calculateMain()" readonly style="background-color: #e5e7eb;"></td>
+            <td class="amount" id="amountCab">0</td>
+        </tr>
+        <tr>
+            <td class="miki">BO</td>
+            <td><input type="number" id="qtyBo" min="0" step="any" oninput="syncFromTable('Bo')"></td>
+            <td><input type="number" id="priceBo" class="price-input" min="0" step="any" value="45" oninput="calculateMain()" readonly style="background-color: #e5e7eb;"></td>
+            <td class="amount" id="amountBo">0</td>
+        </tr>
+        <tr>
+            <td class="miki">TOTAL</td>
+            <td></td>
+            <td></td>
+            <td class="amount" id="totalAmount">0</td>
+        </tr>
+        <tr>
+            <td colspan="2" rowspan="2" id="activeCustomerDisplay" class="active-customer-box">
+                Row 1
+            </td>
+            <td class="label-cell">BAL</td>
+            <td><input type="number" id="inputBal" min="0" step="any" class="direct-amount-input" oninput="calculateMain()"></td>
+        </tr>
+        <tr>
+            <td class="label-cell">PAY</td>
+            <td><input type="number" id="inputPay" min="0" step="any" class="direct-amount-input" oninput="calculateMain()"></td>
+        </tr>
+        <tr>
+            <td class="miki-net-total-large">NET TOTAL</td>
+            <td></td>
+            <td></td>
+            <td class="net-total-large" id="netTotalAmount">0</td>
+        </tr>
+        </tbody>
+    </table>
+
+        <div class="sync-panel">
+            <div class="sync-cell">
+                <label>Dry</label>
+                <input type="number" id="syncDry" min="0" step="any" oninput="syncFromPanel('Dry')">
+            </div>
+            <div class="sync-cell">
+                <label>Fresh</label>
+                <input type="number" id="syncFresh" min="0" step="any" oninput="syncFromPanel('Fresh')">
+            </div>
+            <div class="sync-cell">
+                <label>Cab</label>
+                <input type="number" id="syncCab" min="0" step="any" oninput="syncFromPanel('Cab')">
+            </div>
+            <div class="sync-cell">
+                <label>BO</label>
+                <input type="number" id="syncBo" min="0" step="any" oninput="syncFromPanel('Bo')">
+            </div>
+            <div class="btn-container">
+                <button id="installBtn" class="action-btn install-btn" onclick="installApp()">INSTALL</button>
+                <button class="action-btn clear-btn" onclick="clearMainInputs()">CLEAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active File Bar Header Above Table 2 -->
     <div class="session-bar">
         <div class="session-info">
-            <span id="displayFileDate">Date: -- | --</span>
+            <span id="displayFileDate">Date: --</span>
             <span>|</span>
-            <span id="displayFileName">paul</span>
+            <span id="displayFileName">--</span>
         </div>
-        <div class="btn-group">
-            <button class="btn-sm save-btn" onclick="saveCurrentDay()">Save Day</button>
-            <button class="btn-sm clear-btn" onclick="startNewDay()">New Day</button>
+        <div>
+            <button class="btn-sm save-btn" onclick="openSaveConfirmationModal()">Save Day</button>
+            <button class="btn-sm clear-btn" onclick="promptNewFile()">New Day</button>
         </div>
     </div>
 
-    <!-- TABLE 1 (VERY FIRST TABLE - INPUT BREAKDOWN PANEL) -->
-    <div class="table-box table-box-margin">
-        <table id="table1Breakdown">
-            <colgroup>
-                <col style="width: 25%;">
-                <col style="width: 25%;">
-                <col style="width: 25%;">
-                <col style="width: 25%;">
-            </colgroup>
-            <thead>
-                <tr>
-                    <th class="table1-header">Dry</th>
-                    <th class="table1-header">Fresh</th>
-                    <th class="table1-header">Cab</th>
-                    <th class="table1-header">BO</th>
-                </tr>
-            </thead>
-            <tbody id="table1Body">
-                <!-- Rows auto-generated by JS -->
-            </tbody>
-        </table>
+    <!-- SECOND TABLE (YOUR EXACT ORIGINAL 9 COLUMNS, 16 ROWS) -->
+    <div class="table-box table-box-2">
+    <table>
+        <colgroup>
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 15%;">
+            <col style="width: 15%;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th id="lockHeader" class="lockable-header" onclick="handleKeyClick()" title="Tap 5 times to Lock/Unlock">🔒</th>
+                <th>Dry</th>
+                <th>Fresh</th>
+                <th>Cab</th>
+                <th>BO</th>
+                <th>Bal</th>
+                <th>Billing</th>
+                <th class="colln-header">Coll'n</th>
+                <th>Utang</th>
+            </tr>
+        </thead>
+        <tbody>
+            <script>
+                for (let i = 1; i <= 16; i++) {
+                    document.write(`
+                        <tr>
+                            <td><input type="text" class="name-input" id="ledgerName_${i}" oninput="updateActiveCustomerName(${i}); saveLedger();" onfocus="loadRowToMain(${i})" readonly style="background-color: #e5e5e5;"></td>
+                            <td><input type="text" class="readonly-col" id="ledgerDry_${i}" readonly onfocus="loadRowToMain(${i})"></td>
+                            <td><input type="text" class="readonly-col" id="ledgerFresh_${i}" readonly onfocus="loadRowToMain(${i})"></td>
+                            <td><input type="text" class="readonly-col" id="ledgerCab_${i}" readonly onfocus="loadRowToMain(${i})"></td>
+                            <td><input type="text" class="readonly-col" id="ledgerBo_${i}" readonly onfocus="loadRowToMain(${i})"></td>
+                            <td><input type="text" class="readonly-col" id="ledgerBal_${i}" readonly onfocus="loadRowToMain(${i})"></td>
+                            <td><input type="text" class="readonly-col amount" id="ledgerBilling_${i}" readonly></td>
+                            <td><input type="text" class="readonly-col colln-input" id="ledgerPay_${i}" readonly onfocus="loadRowToMain(${i})"></td>
+                            <td><input type="text" class="readonly-col amount" id="ledgerRem_${i}" readonly></td>
+                        </tr>
+                    `);
+                }
+            </script>
+            <!-- Row 18: Net Total Row -->
+            <tr>
+                <td class="miki" style="color: #dc2626; font-size: 9px; padding: 0 1px;">NET TOTAL</td>
+                <td class="net-total-red" id="totalDry">0</td>
+                <td class="net-total-red" id="totalFresh">0</td>
+                <td class="net-total-red" id="totalCab">0</td>
+                <td class="net-total-red" id="totalBo">0</td>
+                <td class="net-total-red" id="totalBal">0</td>
+                <td class="net-total-red" id="totalBilling">0</td>
+                <td class="net-total-red" id="totalColln">0</td>
+                <td class="net-total-red" id="totalRem">0</td>
+            </tr>
+        </tbody>
+    </table>
     </div>
 
-    <!-- MAIN TABLE 2 (9 COLUMNS LEDGER) -->
-    <div class="table-box">
-        <table id="mainLedgerTable">
-            <colgroup>
-                <col style="width: 10%;">
-                <col style="width: 10%;">
-                <col style="width: 10%;">
-                <col style="width: 10%;">
-                <col style="width: 10%;">
-                <col style="width: 10%;">
-                <col style="width: 10%;">
-                <col style="width: 15%;">
-                <col style="width: 15%;">
-            </colgroup>
-            <thead>
-                <tr>
-                    <th id="mainLockHeader" onclick="handleMainHeaderTap()">🔒</th>
-                    <th>Dry</th>
-                    <th>Fresh</th>
-                    <th>Cab</th>
-                    <th>BO</th>
-                    <th>Bal</th>
-                    <th>Billing</th>
-                    <th class="colln-header">Coll'n</th>
-                    <th>Utang</th>
-                </tr>
-            </thead>
-            <tbody id="mainTableBody">
-                <!-- Rows 1 to 15 auto-generated by JavaScript -->
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td style="color: #dc2626; font-size: 9px; font-weight: bold; text-align: left;">NET TOTAL</td>
-                    <td class="net-total-red" id="net_dry">0</td>
-                    <td class="net-total-red" id="net_fresh">0</td>
-                    <td class="net-total-red" id="net_cab">0</td>
-                    <td class="net-total-red" id="net_bo">0</td>
-                    <td class="net-total-red" id="net_bal">0</td>
-                    <td class="net-total-red" id="net_billing">0</td>
-                    <td class="net-total-red" id="net_colln">0</td>
-                    <td class="net-total-red" id="net_utang">0</td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-
-    <!-- TINY GREEN SLIDER BAR -->
+    <!-- GREEN SLIDER TOGGLE BAR BELOW TABLE 2 -->
     <div class="slider-toggle-bar" id="sliderToggle" onclick="toggleSubTable()">
         <div class="slider-pill"></div>
         <span class="slider-icon" id="sliderIcon">▼ Tap to Open Sub-Table</span>
@@ -441,235 +745,605 @@ table input.colln-input {
         </table>
     </div>
 
-    <!-- SAVED FILES HISTORY SECTION -->
-    <div class="history-section">
+    <!-- 30-DAY HISTORY ARCHIVE -->
+    <div class="history-section" id="savedFilesSection">
         <div class="history-title">
             <span>Saved Files (30-Day History)</span>
-            <span id="historyCount" style="color: #64748b; font-size: 11px;">0 / 30</span>
+            <span id="historyCount" style="font-weight: normal; color: #6b7280; font-size: 11px;">0 / 30</span>
         </div>
         <div class="history-list" id="historyContainer">
-            <!-- Saved files loaded dynamically -->
+            <p style="color: #9ca3af; text-align: center; margin: 10px 0;">No saved files yet.</p>
         </div>
     </div>
-
 </div>
 <script>
-// SUB-TABLE SLIDER TOGGLE
-function toggleSubTable() {
-    const container = document.getElementById("expandableContainer");
-    const icon = document.getElementById("sliderIcon");
-
-    if (container.classList.contains("open")) {
-        container.classList.remove("open");
-        icon.textContent = "▼ Tap to Open Sub-Table";
-    } else {
-        container.classList.add("open");
-        icon.textContent = "▲ Tap to Close Sub-Table";
-    }
-}
-
-// 5-TAP HEADER LOCK / UNLOCK FOR SUB-TABLE
-let subTapCount = 0;
-let subTapTimer = null;
+// --- GLOBAL VARIABLES & STATE ---
+let activeRowIndex = 1;
+let currentFileId = null;
+let currentFileDate = "";
+let currentFileName = "";
+let priceLockTapCount = 0;
+let headerTapCount = 0;
+let subHeaderTapCount = 0;
+let isPricesLocked = true;
+let isNamesLocked = true;
 let isSubItemsLocked = true;
 
-function handleSubHeaderTap() {
-    subTapCount++;
-    clearTimeout(subTapTimer);
-    subTapTimer = setTimeout(() => {
-        subTapCount = 0;
-    }, 1000);
+// Modal Action States
+let modalActionState = "INITIAL_NEW"; // "INITIAL_NEW", "OVERWRITE_SAVE", "SAVE_AS", "PROMPT_NEW"
 
-    if (subTapCount >= 5) {
-        subTapCount = 0;
-        isSubItemsLocked = !isSubItemsLocked;
-        toggleSubItemLock(isSubItemsLocked);
-    }
-}
-
-function toggleSubItemLock(locked) {
-    const h1 = document.getElementById("subItemHeader1");
-    const h2 = document.getElementById("subItemHeader2");
-    const label = locked ? "Item 🔒" : "Item 🔑";
-    h1.textContent = label;
-    h2.textContent = label;
-
-    const itemInputs = document.querySelectorAll(".sub-item-input");
-    itemInputs.forEach(input => {
-        input.readOnly = locked;
-        input.style.backgroundColor = locked ? "#e2e8f0" : "white";
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker Registered'))
+            .catch(err => console.log('Service Worker Failed', err));
     });
 }
 
-// SUB-TABLE AUTOMATIC CALCULATIONS
-function calculateSubTable() {
-    let sumAmounts = 0;
+// Deferred PWA Install Prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) installBtn.style.display = 'block';
+});
 
-    // Compute Sum of Column 2 (Rows 1-6) + Column 4 (Rows 1-6)
-    for (let r = 1; r <= 6; r++) {
-        const val1 = parseFloat(document.getElementById(`sub_amt1_${r}`).value) || 0;
-        const val2 = parseFloat(document.getElementById(`sub_amt2_${r}`).value) || 0;
-        sumAmounts += val1 + val2;
+function installApp() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                document.getElementById('installBtn').style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
     }
+}
 
-    // Row 1: Sum of All Amounts
-    document.getElementById("sub_sum_total").value = sumAmounts !== 0 ? sumAmounts.toLocaleString() : "";
+// ON INIT PAGE LOAD
+window.addEventListener('DOMContentLoaded', () => {
+    autoOpenInitialModal();
+    renderHistoryList();
+});
 
-    // Row 2: Net Balance (Net Total minus Sum)
-    const netUtangElem = document.getElementById("net_utang");
-    const mainNetTotal = parseFloat(netUtangElem ? netUtangElem.textContent.replace(/,/g, '') : 0) || 0;
-    const netBal = mainNetTotal - sumAmounts;
-    document.getElementById("sub_net_bal").value = (mainNetTotal !== 0 || sumAmounts !== 0) ? netBal.toLocaleString() : "";
+// --- MODAL / FILE MANAGEMENT LOGIC ---
+function autoOpenInitialModal() {
+    modalActionState = "INITIAL_NEW";
+    document.getElementById('modalTitle').innerText = "Start New Ledger File";
+    document.getElementById('modalSubtext').innerText = "Please fill out both the Date and Name to unlock encoding.";
+    document.getElementById('modalActionBtn').innerText = "Open Ledger";
+    
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('modalDateInput').value = today;
+    document.getElementById('modalNameInput').value = "";
+    
+    document.getElementById('setupModal').style.display = 'flex';
+}
 
-    // Row 3 & 4: COH Input and Red Highlighted Overall Total
-    const cohInputElem = document.getElementById("sub_coh_input");
-    const cohVal = parseFloat(cohInputElem.value) || 0;
-    const hasCohInput = cohInputElem.value.trim() !== "";
+function promptNewFile() {
+    modalActionState = "PROMPT_NEW";
+    document.getElementById('modalTitle').innerText = "Start New Ledger File";
+    document.getElementById('modalSubtext').innerText = "Enter date and route name for the new file.";
+    document.getElementById('modalActionBtn').innerText = "Create New File";
+    
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('modalDateInput').value = today;
+    document.getElementById('modalNameInput').value = "";
+    
+    document.getElementById('setupModal').style.display = 'flex';
+}
 
-    if (hasCohInput || (mainNetTotal !== 0 || sumAmounts !== 0)) {
-        const overallTotal = cohVal - netBal;
-        document.getElementById("sub_overall_total").value = overallTotal.toLocaleString();
+function openSaveConfirmationModal() {
+    if (!currentFileId) {
+        modalActionState = "INITIAL_NEW";
+        document.getElementById('modalTitle').innerText = "Save New Ledger File";
+        document.getElementById('modalSubtext').innerText = "Please confirm the Date and Route Name before saving.";
+        document.getElementById('modalActionBtn').innerText = "Save Ledger";
     } else {
-        document.getElementById("sub_overall_total").value = "";
+        modalActionState = "OVERWRITE_SAVE";
+        document.getElementById('modalTitle').innerText = "Save Changes";
+        document.getElementById('modalSubtext').innerText = "Save changes to current file or save as a new file?";
+        document.getElementById('modalActionBtn').innerText = "Update Existing File";
     }
+    
+    document.getElementById('modalDateInput').value = currentFileDate || new Date().toISOString().split('T')[0];
+    document.getElementById('modalNameInput').value = currentFileName || "";
+    
+    document.getElementById('setupModal').style.display = 'flex';
 }
 
-// RENDER TABLE 1 (VERY FIRST BREAKDOWN TABLE)
-function renderTable1Rows() {
-    const tbody = document.getElementById("table1Body");
-    if (!tbody) return;
-
-    let rowsHtml = "";
-    for (let i = 1; i <= 5; i++) {
-        rowsHtml += `
-            <tr>
-                <td><input type="number" class="t1-dry" oninput="calculateTable1AndLedger()"></td>
-                <td><input type="number" class="t1-fresh" oninput="calculateTable1AndLedger()"></td>
-                <td><input type="number" class="t1-cab" oninput="calculateTable1AndLedger()"></td>
-                <td><input type="number" class="t1-bo" oninput="calculateTable1AndLedger()"></td>
-            </tr>
-        `;
-    }
-    tbody.innerHTML = rowsHtml;
+function closeSetupModal() {
+    document.getElementById('setupModal').style.display = 'none';
 }
 
-// RENDER MAIN TABLE 2 (9-COLUMN LEDGER)
-function renderMainTableRows() {
-    const tbody = document.getElementById("mainTableBody");
-    if (!tbody) return;
+function handleModalSubmit() {
+    const dateVal = document.getElementById('modalDateInput').value;
+    const nameVal = document.getElementById('modalNameInput').value.trim();
 
-    let rowsHtml = "";
-    for (let i = 1; i <= 15; i++) {
-        rowsHtml += `
-            <tr>
-                <td><input type="text" class="name-input" readonly value="Customer ${i}" style="background-color: #e2e8f0;"></td>
-                <td><input type="number" class="t2-dry readonly-col" readonly></td>
-                <td><input type="number" class="t2-fresh readonly-col" readonly></td>
-                <td><input type="number" class="t2-cab readonly-col" readonly></td>
-                <td><input type="number" class="t2-bo readonly-col" readonly></td>
-                <td><input type="number" class="t2-bal readonly-col" readonly></td>
-                <td><input type="number" class="t2-billing readonly-col" readonly></td>
-                <td><input type="number" class="t2-colln colln-input" oninput="calculateTable1AndLedger()"></td>
-                <td><input type="number" class="t2-utang readonly-col" readonly></td>
-            </tr>
-        `;
-    }
-    tbody.innerHTML = rowsHtml;
-}
-
-// GLOBAL CALCULATION ROUTINE FOR TABLE 1, TABLE 2, AND SUB-TABLE
-function calculateTable1AndLedger() {
-    // 1. Calculate Totals from Table 1 inputs
-    let totalDry = 0, totalFresh = 0, totalCab = 0, totalBo = 0;
-
-    document.querySelectorAll(".t1-dry").forEach(inp => totalDry += parseFloat(inp.value) || 0);
-    document.querySelectorAll(".t1-fresh").forEach(inp => totalFresh += parseFloat(inp.value) || 0);
-    document.querySelectorAll(".t1-cab").forEach(inp => totalCab += parseFloat(inp.value) || 0);
-    document.querySelectorAll(".t1-bo").forEach(inp => totalBo += parseFloat(inp.value) || 0);
-
-    // Update Net Total Row in Main Table
-    document.getElementById("net_dry").textContent = totalDry !== 0 ? totalDry.toLocaleString() : "0";
-    document.getElementById("net_fresh").textContent = totalFresh !== 0 ? totalFresh.toLocaleString() : "0";
-    document.getElementById("net_cab").textContent = totalCab !== 0 ? totalCab.toLocaleString() : "0";
-    document.getElementById("net_bo").textContent = totalBo !== 0 ? totalBo.toLocaleString() : "0";
-
-    const overallBilling = totalDry + totalFresh + totalCab + totalBo;
-    document.getElementById("net_billing").textContent = overallBilling !== 0 ? overallBilling.toLocaleString() : "0";
-
-    // 2. Calculate Collection and Utang Columns
-    let totalColln = 0;
-    document.querySelectorAll(".t2-colln").forEach(inp => {
-        totalColln += parseFloat(inp.value) || 0;
-    });
-    document.getElementById("net_colln").textContent = totalColln !== 0 ? totalColln.toLocaleString() : "0";
-
-    const overallUtang = overallBilling - totalColln;
-    document.getElementById("net_utang").textContent = overallUtang !== 0 ? overallUtang.toLocaleString() : "0";
-
-    // 3. Trigger Sub-Table Auto-Computation
-    calculateSubTable();
-}
-
-// HISTORY & LOCALSTORAGE HELPERS
-function loadHistory() {
-    const historyContainer = document.getElementById("historyContainer");
-    const historyCount = document.getElementById("historyCount");
-    if (!historyContainer) return;
-
-    const saved = JSON.parse(localStorage.getItem("miki_saved_files") || "[]");
-    historyCount.textContent = `${saved.length} / 30`;
-
-    if (saved.length === 0) {
-        historyContainer.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:10px;">No saved history yet</div>';
+    if (!dateVal || !nameVal) {
+        alert("Please provide both Date and Salesman/Route Name!");
         return;
     }
 
-    let html = "";
-    saved.forEach((item, index) => {
-        html += `
-            <div class="history-item">
-                <span>${item.date} - ${item.name}</span>
-                <div>
-                    <button class="btn-sm btn-edit" onclick="loadSavedFile(${index})">Edit</button>
-                    <button class="btn-sm btn-del" onclick="deleteSavedFile(${index})">Del</button>
-                </div>
-            </div>
-        `;
-    });
-    historyContainer.innerHTML = html;
+    if (modalActionState === "INITIAL_NEW" || modalActionState === "PROMPT_NEW") {
+        currentFileId = 'ledger_' + Date.now();
+        currentFileDate = dateVal;
+        currentFileName = nameVal;
+        
+        clearAllLedgerFields();
+        clearMainInputs();
+        clearSubTableInputs();
+        
+        updateSessionUI();
+        saveLedger();
+    } else if (modalActionState === "OVERWRITE_SAVE") {
+        currentFileDate = dateVal;
+        currentFileName = nameVal;
+        updateSessionUI();
+        saveLedger();
+        alert("File updated successfully!");
+    }
+
+    closeSetupModal();
 }
 
-function saveCurrentDay() {
-    const saved = JSON.parse(localStorage.getItem("miki_saved_files") || "[]");
-    const today = new Date().toISOString().split('T')[0];
-    
-    saved.unshift({
-        date: today,
-        name: "paul"
-    });
-
-    if (saved.length > 30) saved.pop();
-
-    localStorage.setItem("miki_saved_files", JSON.stringify(saved));
-    loadHistory();
-    alert("Saved successfully!");
+function updateSessionUI() {
+    document.getElementById('displayFileDate').innerText = "Date: " + (currentFileDate || "--");
+    document.getElementById('displayFileName').innerText = currentFileName || "--";
 }
 
-function startNewDay() {
-    if (confirm("Start new day? Unsaved changes will be cleared.")) {
-        document.querySelectorAll("input[type='number']").forEach(i => i.value = "");
-        calculateTable1AndLedger();
+// --- 5-TAP LOCK / UNLOCK SYSTEM ---
+function handlePriceKeyClick() {
+    priceLockTapCount++;
+    if (priceLockTapCount >= 5) {
+        isPricesLocked = !isPricesLocked;
+        priceLockTapCount = 0;
+        
+        const priceInputs = document.querySelectorAll('.price-input');
+        const lockHeader = document.getElementById('priceLockHeader');
+        
+        priceInputs.forEach(input => {
+            input.readOnly = isPricesLocked;
+            input.style.backgroundColor = isPricesLocked ? "#e5e7eb" : "#ffffff";
+        });
+        
+        lockHeader.innerText = isPricesLocked ? "Price 🔒" : "Price 🔓";
+        alert(isPricesLocked ? "Prices LOCKED!" : "Prices UNLOCKED for editing!");
     }
 }
 
-// INITIALIZE ON LOAD
-window.addEventListener("DOMContentLoaded", () => {
-    renderTable1Rows();
-    renderMainTableRows();
-    loadHistory();
-    calculateTable1AndLedger();
-});
-</script>
+function handleKeyClick() {
+    headerTapCount++;
+    if (headerTapCount >= 5) {
+        isNamesLocked = !isNamesLocked;
+        headerTapCount = 0;
+        
+        const nameInputs = document.querySelectorAll('.name-input');
+        const lockHeader = document.getElementById('lockHeader');
+        
+        nameInputs.forEach(input => {
+            input.readOnly = isNamesLocked;
+            input.style.backgroundColor = isNamesLocked ? "#e5e5e5" : "#ffffff";
+        });
+        
+        lockHeader.innerText = isNamesLocked ? "🔒" : "🔓";
+        alert(isNamesLocked ? "Names LOCKED!" : "Names UNLOCKED for editing!");
+    }
+}
 
+function handleSubHeaderTap() {
+    subHeaderTapCount++;
+    if (subHeaderTapCount >= 5) {
+        isSubItemsLocked = !isSubItemsLocked;
+        subHeaderTapCount = 0;
+        
+        const subItemInputs = document.querySelectorAll('.sub-item-input');
+        const header1 = document.getElementById('subItemHeader1');
+        const header2 = document.getElementById('subItemHeader2');
+        
+        subItemInputs.forEach(input => {
+            input.readOnly = isSubItemsLocked;
+            input.style.backgroundColor = isSubItemsLocked ? "#e2e8f0" : "#ffffff";
+        });
+        
+        const label = isSubItemsLocked ? "Item 🔒" : "Item 🔓";
+        if (header1) header1.innerText = label;
+        if (header2) header2.innerText = label;
+        
+        alert(isSubItemsLocked ? "Sub-Table Items LOCKED!" : "Sub-Table Items UNLOCKED!");
+    }
+}
+
+// --- TABLE 1 <-> TABLE 2 SYNC & CALCULATIONS ---
+function loadRowToMain(rowIndex) {
+    activeRowIndex = rowIndex;
+    
+    // Highlight Active Customer Name
+    const activeName = document.getElementById(`ledgerName_${rowIndex}`).value;
+    document.getElementById('activeCustomerDisplay').innerText = activeName ? activeName : `Row ${rowIndex}`;
+
+    // Get values from Ledger
+    const dry = document.getElementById(`ledgerDry_${rowIndex}`).value;
+    const fresh = document.getElementById(`ledgerFresh_${rowIndex}`).value;
+    const cab = document.getElementById(`ledgerCab_${rowIndex}`).value;
+    const bo = document.getElementById(`ledgerBo_${rowIndex}`).value;
+    const bal = document.getElementById(`ledgerBal_${rowIndex}`).value;
+    const pay = document.getElementById(`ledgerPay_${rowIndex}`).value;
+
+    // Load to Main Table inputs
+    document.getElementById('qtyReg').value = dry;
+    document.getElementById('syncDry').value = dry;
+    
+    document.getElementById('qtyFresh').value = fresh;
+    document.getElementById('syncFresh').value = fresh;
+    
+    document.getElementById('qtyCab').value = cab;
+    document.getElementById('syncCab').value = cab;
+    
+    document.getElementById('qtyBo').value = bo;
+    document.getElementById('syncBo').value = bo;
+
+    document.getElementById('inputBal').value = bal;
+    document.getElementById('inputPay').value = pay;
+
+    calculateMain(false); // Calculate without triggering circular save loops
+}
+
+function syncFromTable(itemType) {
+    const qtyVal = document.getElementById(`qty${itemType}`).value;
+    document.getElementById(`sync${itemType}`).value = qtyVal;
+    
+    // Push to Ledger
+    const ledgerField = itemType === 'Reg' ? 'Dry' : itemType;
+    document.getElementById(`ledger${ledgerField}_${activeRowIndex}`).value = qtyVal;
+    
+    calculateMain();
+}
+
+function syncFromPanel(itemType) {
+    const syncVal = document.getElementById(`sync${itemType}`).value;
+    const tableField = itemType === 'Dry' ? 'Reg' : itemType;
+    document.getElementById(`qty${tableField}`).value = syncVal;
+    
+    // Push to Ledger
+    document.getElementById(`ledger${itemType}_${activeRowIndex}`).value = syncVal;
+    
+    calculateMain();
+}
+
+function updateActiveCustomerName(rowIndex) {
+    if (rowIndex === activeRowIndex) {
+        const nameVal = document.getElementById(`ledgerName_${rowIndex}`).value;
+        document.getElementById('activeCustomerDisplay').innerText = nameVal ? nameVal : `Row ${rowIndex}`;
+    }
+}
+
+function calculateMain(shouldSave = true) {
+    // Price Inputs
+    const priceReg = parseFloat(document.getElementById('priceReg').value) || 0;
+    const priceFresh = parseFloat(document.getElementById('priceFresh').value) || 0;
+    const priceCab = parseFloat(document.getElementById('priceCab').value) || 0;
+    const priceBo = parseFloat(document.getElementById('priceBo').value) || 0;
+
+    // Quantity Inputs
+    const qtyReg = parseFloat(document.getElementById('qtyReg').value) || 0;
+    const qtyFresh = parseFloat(document.getElementById('qtyFresh').value) || 0;
+    const qtyCab = parseFloat(document.getElementById('qtyCab').value) || 0;
+    const qtyBo = parseFloat(document.getElementById('qtyBo').value) || 0;
+
+    // Amounts
+    const amtReg = qtyReg * priceReg;
+    const amtFresh = qtyFresh * priceFresh;
+    const amtCab = qtyCab * priceCab;
+    const amtBo = qtyBo * priceBo;
+
+    document.getElementById('amountReg').innerText = amtReg.toLocaleString();
+    document.getElementById('amountFresh').innerText = amtFresh.toLocaleString();
+    document.getElementById('amountCab').innerText = amtCab.toLocaleString();
+    document.getElementById('amountBo').innerText = amtBo.toLocaleString();
+
+    const totalBilling = amtReg + amtFresh + amtCab + amtBo;
+    document.getElementById('totalAmount').innerText = totalBilling.toLocaleString();
+
+    const inputBal = parseFloat(document.getElementById('inputBal').value) || 0;
+    const inputPay = parseFloat(document.getElementById('inputPay').value) || 0;
+
+    const netTotal = (totalBilling + inputBal) - inputPay;
+    document.getElementById('netTotalAmount').innerText = netTotal.toLocaleString();
+
+    // Update Active Ledger Row
+    document.getElementById(`ledgerBal_${activeRowIndex}`).value = inputBal || '';
+    document.getElementById(`ledgerBilling_${activeRowIndex}`).value = totalBilling ? totalBilling.toLocaleString() : '';
+    document.getElementById(`ledgerPay_${activeRowIndex}`).value = inputPay || '';
+    document.getElementById(`ledgerRem_${activeRowIndex}`).value = netTotal ? netTotal.toLocaleString() : '';
+
+    calculateLedgerTotals();
+    
+    if (shouldSave) {
+        saveLedger();
+    }
+}
+
+function calculateLedgerTotals() {
+    let totDry = 0, totFresh = 0, totCab = 0, totBo = 0;
+    let totBal = 0, totBilling = 0, totColln = 0, totRem = 0;
+
+    for (let i = 1; i <= 16; i++) {
+        totDry += parseFloat(document.getElementById(`ledgerDry_${i}`).value) || 0;
+        totFresh += parseFloat(document.getElementById(`ledgerFresh_${i}`).value) || 0;
+        totCab += parseFloat(document.getElementById(`ledgerCab_${i}`).value) || 0;
+        totBo += parseFloat(document.getElementById(`ledgerBo_${i}`).value) || 0;
+        totBal += parseFloat(document.getElementById(`ledgerBal_${i}`).value) || 0;
+        
+        // Remove commas before parsing float for currency formats
+        const billingStr = (document.getElementById(`ledgerBilling_${i}`).value || '0').replace(/,/g, '');
+        const remStr = (document.getElementById(`ledgerRem_${i}`).value || '0').replace(/,/g, '');
+        
+        totBilling += parseFloat(billingStr) || 0;
+        totColln += parseFloat(document.getElementById(`ledgerPay_${i}`).value) || 0;
+        totRem += parseFloat(remStr) || 0;
+    }
+
+    document.getElementById('totalDry').innerText = totDry || 0;
+    document.getElementById('totalFresh').innerText = totFresh || 0;
+    document.getElementById('totalCab').innerText = totCab || 0;
+    document.getElementById('totalBo').innerText = totBo || 0;
+    document.getElementById('totalBal').innerText = totBal.toLocaleString();
+    document.getElementById('totalBilling').innerText = totBilling.toLocaleString();
+    document.getElementById('totalColln').innerText = totColln.toLocaleString();
+    document.getElementById('totalRem').innerText = totRem.toLocaleString();
+
+    // AUTO-SYNC TO SUB-TABLE
+    calculateSubTable();
+}
+
+function clearMainInputs() {
+    document.getElementById('qtyReg').value = '';
+    document.getElementById('qtyFresh').value = '';
+    document.getElementById('qtyCab').value = '';
+    document.getElementById('qtyBo').value = '';
+
+    document.getElementById('syncDry').value = '';
+    document.getElementById('syncFresh').value = '';
+    document.getElementById('syncCab').value = '';
+    document.getElementById('syncBo').value = '';
+
+    document.getElementById('inputBal').value = '';
+    document.getElementById('inputPay').value = '';
+
+    document.getElementById('amountReg').innerText = '0';
+    document.getElementById('amountFresh').innerText = '0';
+    document.getElementById('amountCab').innerText = '0';
+    document.getElementById('amountBo').innerText = '0';
+    document.getElementById('totalAmount').innerText = '0';
+    document.getElementById('netTotalAmount').innerText = '0';
+}
+
+function clearAllLedgerFields() {
+    for (let i = 1; i <= 16; i++) {
+        document.getElementById(`ledgerName_${i}`).value = '';
+        document.getElementById(`ledgerDry_${i}`).value = '';
+        document.getElementById(`ledgerFresh_${i}`).value = '';
+        document.getElementById(`ledgerCab_${i}`).value = '';
+        document.getElementById(`ledgerBo_${i}`).value = '';
+        document.getElementById(`ledgerBal_${i}`).value = '';
+        document.getElementById(`ledgerBilling_${i}`).value = '';
+        document.getElementById(`ledgerPay_${i}`).value = '';
+        document.getElementById(`ledgerRem_${i}`).value = '';
+    }
+    calculateLedgerTotals();
+}
+
+// --- SLIDING SUB-TABLE LOGIC & CALCULATIONS ---
+function toggleSubTable() {
+    const container = document.getElementById('expandableContainer');
+    const icon = document.getElementById('sliderIcon');
+    
+    container.classList.toggle('open');
+    if (container.classList.contains('open')) {
+        icon.innerText = "▲ Tap to Close Sub-Table";
+    } else {
+        icon.innerText = "▼ Tap to Open Sub-Table";
+    }
+}
+
+function calculateSubTable() {
+    let sumTotal = 0;
+    
+    // Sum up 12 sub-table amounts (2 columns x 6 rows)
+    for (let i = 1; i <= 6; i++) {
+        const amt1 = parseFloat(document.getElementById(`sub_amt1_${i}`).value) || 0;
+        const amt2 = parseFloat(document.getElementById(`sub_amt2_${i}`).value) || 0;
+        sumTotal += (amt1 + amt2);
+    }
+
+    // Get Table 2 Totals directly
+    const totalBillingVal = parseFloat((document.getElementById('totalBilling').innerText || '0').replace(/,/g, '')) || 0;
+    const totalBalVal = parseFloat((document.getElementById('totalBal').innerText || '0').replace(/,/g, '')) || 0;
+    const netBal = totalBillingVal + totalBalVal;
+
+    const cohVal = parseFloat(document.getElementById('sub_coh_input').value) || 0;
+
+    // Formula: Overall = (Sum Total + COH) - Net Bal
+    const overallTotal = (sumTotal + cohVal) - netBal;
+
+    // Update Sub-Table outputs
+    document.getElementById('sub_sum_total').value = sumTotal ? sumTotal.toLocaleString() : '0';
+    document.getElementById('sub_net_bal').value = netBal ? netBal.toLocaleString() : '0';
+    document.getElementById('sub_overall_total').value = overallTotal ? overallTotal.toLocaleString() : '0';
+
+    saveLedger();
+}
+
+function clearSubTableInputs() {
+    for (let i = 1; i <= 6; i++) {
+        document.getElementById(`sub_amt1_${i}`).value = '';
+        document.getElementById(`sub_amt2_${i}`).value = '';
+    }
+    document.getElementById('sub_coh_input').value = '';
+    calculateSubTable();
+}
+
+// --- LOCALSTORAGE & 30-DAY HISTORY ARCHIVE ---
+function saveLedger() {
+    if (!currentFileId) return;
+
+    // Collect Ledger Data
+    const rowsData = [];
+    for (let i = 1; i <= 16; i++) {
+        rowsData.push({
+            name: document.getElementById(`ledgerName_${i}`).value,
+            dry: document.getElementById(`ledgerDry_${i}`).value,
+            fresh: document.getElementById(`ledgerFresh_${i}`).value,
+            cab: document.getElementById(`ledgerCab_${i}`).value,
+            bo: document.getElementById(`ledgerBo_${i}`).value,
+            bal: document.getElementById(`ledgerBal_${i}`).value,
+            billing: document.getElementById(`ledgerBilling_${i}`).value,
+            pay: document.getElementById(`ledgerPay_${i}`).value,
+            rem: document.getElementById(`ledgerRem_${i}`).value
+        });
+    }
+
+    // Collect Sub-Table Data
+    const subTableData = {
+        amounts1: [],
+        amounts2: [],
+        coh: document.getElementById('sub_coh_input').value
+    };
+    for (let i = 1; i <= 6; i++) {
+        subTableData.amounts1.push(document.getElementById(`sub_amt1_${i}`).value);
+        subTableData.amounts2.push(document.getElementById(`sub_amt2_${i}`).value);
+    }
+
+    const payload = {
+        id: currentFileId,
+        date: currentFileDate,
+        name: currentFileName,
+        timestamp: Date.now(),
+        rows: rowsData,
+        subTable: subTableData
+    };
+
+    localStorage.setItem(currentFileId, JSON.stringify(payload));
+    
+    // Maintain Index in LocalStorage
+    let historyIndex = JSON.parse(localStorage.getItem('miki_history_index')) || [];
+    if (!historyIndex.includes(currentFileId)) {
+        historyIndex.unshift(currentFileId);
+        
+        // Auto-prune if older than 30 files
+        if (historyIndex.length > 30) {
+            const removedId = historyIndex.pop();
+            localStorage.removeItem(removedId);
+        }
+        
+        localStorage.setItem('miki_history_index', JSON.stringify(historyIndex));
+    }
+
+    renderHistoryList();
+}
+
+function loadLedgerFromFile(fileId) {
+    const dataRaw = localStorage.getItem(fileId);
+    if (!dataRaw) return;
+
+    const payload = JSON.parse(dataRaw);
+    currentFileId = payload.id;
+    currentFileDate = payload.date;
+    currentFileName = payload.name;
+
+    updateSessionUI();
+
+    // Populate Ledger Rows
+    payload.rows.forEach((row, idx) => {
+        const i = idx + 1;
+        document.getElementById(`ledgerName_${i}`).value = row.name || '';
+        document.getElementById(`ledgerDry_${i}`).value = row.dry || '';
+        document.getElementById(`ledgerFresh_${i}`).value = row.fresh || '';
+        document.getElementById(`ledgerCab_${i}`).value = row.cab || '';
+        document.getElementById(`ledgerBo_${i}`).value = row.bo || '';
+        document.getElementById(`ledgerBal_${i}`).value = row.bal || '';
+        document.getElementById(`ledgerBilling_${i}`).value = row.billing || '';
+        document.getElementById(`ledgerPay_${i}`).value = row.pay || '';
+        document.getElementById(`ledgerRem_${i}`).value = row.rem || '';
+    });
+
+    // Populate Sub-Table
+    if (payload.subTable) {
+        for (let i = 1; i <= 6; i++) {
+            document.getElementById(`sub_amt1_${i}`).value = payload.subTable.amounts1[i-1] || '';
+            document.getElementById(`sub_amt2_${i}`).value = payload.subTable.amounts2[i-1] || '';
+        }
+        document.getElementById('sub_coh_input').value = payload.subTable.coh || '';
+    }
+
+    // Focus Row 1 by default
+    loadRowToMain(1);
+    calculateLedgerTotals();
+    renderHistoryList();
+}
+
+function deleteLedgerFile(fileId, event) {
+    if (event) event.stopPropagation();
+    
+    if (confirm("Are you sure you want to delete this file from history?")) {
+        localStorage.removeItem(fileId);
+        
+        let historyIndex = JSON.parse(localStorage.getItem('miki_history_index')) || [];
+        historyIndex = historyIndex.filter(id => id !== fileId);
+        localStorage.setItem('miki_history_index', JSON.stringify(historyIndex));
+
+        if (currentFileId === fileId) {
+            currentFileId = null;
+            currentFileDate = "";
+            currentFileName = "";
+            updateSessionUI();
+            clearAllLedgerFields();
+            clearMainInputs();
+            clearSubTableInputs();
+        }
+
+        renderHistoryList();
+    }
+}
+
+function renderHistoryList() {
+    const historyIndex = JSON.parse(localStorage.getItem('miki_history_index')) || [];
+    const container = document.getElementById('historyContainer');
+    const countEl = document.getElementById('historyCount');
+
+    countEl.innerText = `${historyIndex.length} / 30`;
+
+    if (historyIndex.length === 0) {
+        container.innerHTML = `<p style="color: #9ca3af; text-align: center; margin: 10px 0;">No saved files yet.</p>`;
+        return;
+    }
+
+    let html = '';
+    historyIndex.forEach(fileId => {
+        const itemRaw = localStorage.getItem(fileId);
+        if (itemRaw) {
+            const item = JSON.parse(itemRaw);
+            const isSelected = fileId === currentFileId ? 'selected-file' : '';
+            html += `
+                <div class="history-item ${isSelected}" onclick="loadLedgerFromFile('${item.id}')">
+                    <div>
+                        <strong>${item.date}</strong> - ${item.name}
+                    </div>
+                    <div>
+                        <button class="btn-sm btn-edit" onclick="loadLedgerFromFile('${item.id}')">Open</button>
+                        <button class="btn-sm btn-del" onclick="deleteLedgerFile('${item.id}', event)">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+    });
+
+    container.innerHTML = html;
+}
+</script>
 </body>
 </html>
